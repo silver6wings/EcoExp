@@ -1,7 +1,7 @@
 
 class Person:
-    def __init__(self):
-        self.balance = 0
+    def __init__(self, balance):
+        self.balance = balance
 
 if __name__ == '__main__':
     p = Person()
