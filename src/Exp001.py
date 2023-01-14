@@ -1,3 +1,9 @@
+"""
+开局没人初识100块钱
+1. 每回合每个人给随机一个人一个硬币
+2. 如果没钱了则不用给
+"""
+
 from random import random
 import matplotlib.pyplot as plt
 
