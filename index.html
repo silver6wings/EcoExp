@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太阳系行星公转模拟 - 3D实时</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sun-color: #FDB813;
+            --sun-glow: #FF6B35;
+            --orbit-color: rgba(255, 255, 255, 0.15);
+            --bg-deep: #0a0a1a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg-deep);
+            font-family: 'Noto Sans SC', sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .cosmos {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 80%, rgba(120, 50, 180, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(50, 100, 180, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(20, 20, 50, 1) 0%, var(--bg-deep) 100%);
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: var(--opacity); transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.8); }
+        }
+
+        .header {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #fff 0%, #a8d4ff 50%, #fff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 3px;
+        }
+
+        .time-display {
+            margin-top: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            color: #a8d4ff;
+            text-shadow: 0 0 20px rgba(168, 212, 255, 0.5);
+        }
+
+        .date-display {
+            margin-top: 5px;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 1px;
+        }
+
+        .lunar-display {
+            margin-top: 6px;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.75);
+            letter-spacing: 1px;
+        }
+
+        .bazi-display {
+            margin-top: 6px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.85);
+            letter-spacing: 1px;
+            text-shadow: 0 0 16px rgba(168, 212, 255, 0.25);
+        }
+
+        .solar-system-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            perspective: 800px;
+            width: 100vmin;
+            height: 100vmin;
+        }
+
+        .solar-system {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            /* 角度抬起：更方便观察（数值越小越“竖”） */
+            transform: rotateX(40deg) rotateZ(-20deg);
+        }
+
+        .sun {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) translateZ(5px);
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle at 30% 30%, #FFF5E0 0%, var(--sun-color) 40%, var(--sun-glow) 100%);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 60px var(--sun-color),
+                0 0 100px var(--sun-glow),
+                0 0 200px rgba(255, 107, 53, 0.4);
+            animation: sunPulse 4s ease-in-out infinite;
+            z-index: 100;
+        }
+
+        @keyframes sunPulse {
+            0%, 100% { box-shadow: 0 0 60px var(--sun-color), 0 0 100px var(--sun-glow), 0 0 200px rgba(255, 107, 53, 0.4); }
+            50% { box-shadow: 0 0 80px var(--sun-color), 0 0 130px var(--sun-glow), 0 0 250px rgba(255, 107, 53, 0.5); }
+        }
+
+        /* 轨道平面 - 包含轨道线和行星 */
+        .orbit-plane {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            transform-style: preserve-3d;
+        }
+
+        /* 椭圆轨道线 */
+        .orbit-path {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        /* 行星 */
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: box-shadow 0.3s ease;
+            z-index: 10;
+        }
+
+        .planet:hover {
+            z-index: 200;
+        }
+
+        .planet-label {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) rotateX(-70deg) rotateZ(20deg);
+            margin-top: 5px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.9);
+            white-space: nowrap;
+            font-family: 'Noto Sans SC', sans-serif;
+            text-shadow: 0 0 8px rgba(0,0,0,1);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .planet:hover .planet-label {
+            opacity: 1;
+        }
+
+        /* 行星样式（颜色取常见“观测印象”近似，不追求增强色/严格测光） */
+        .mercury { background: radial-gradient(circle at 30% 30%, #F0F0F0 0%, #A6A6A6 65%, #7E7E7E 100%); box-shadow: 0 0 8px rgba(180, 180, 180, 0.45); }
+        .venus   { background: radial-gradient(circle at 30% 30%, #FFF7E6 0%, #E8D3A5 55%, #C9A66B 100%); box-shadow: 0 0 12px rgba(233, 208, 155, 0.40); }
+        .earth   { background: radial-gradient(circle at 30% 30%, #BFE3FF 0%, #2B6CB0 55%, #1E7F4D 100%); box-shadow: 0 0 15px rgba(120, 180, 255, 0.45); }
+        .mars    { background: radial-gradient(circle at 30% 30%, #F2A082 0%, #C85B2A 60%, #8F2F10 100%); box-shadow: 0 0 10px rgba(220, 110, 60, 0.35); }
+        .jupiter { background: repeating-linear-gradient(0deg, #D9C3A7 0px, #C9A37A 2px, #E8D7C4 4px, #B7865C 6px); box-shadow: 0 0 25px rgba(215, 190, 160, 0.35); }
+        .saturn  { background: radial-gradient(circle at 30% 30%, #FFF6DC 0%, #E6D3A8 55%, #CBB27D 100%); box-shadow: 0 0 20px rgba(235, 215, 160, 0.35); }
+        .uranus  { background: radial-gradient(circle at 30% 30%, #D8FAFF 0%, #7FD8E6 55%, #49B4C7 100%); box-shadow: 0 0 15px rgba(120, 220, 230, 0.35); }
+        .neptune { background: radial-gradient(circle at 30% 30%, #A8B7FF 0%, #3455D1 55%, #1D2E7A 100%); box-shadow: 0 0 15px rgba(90, 120, 255, 0.35); }
+        .pluto   { background: radial-gradient(circle at 30% 30%, #EFE4D5 0%, #C7B3A0 55%, #8B786A 100%); box-shadow: 0 0 8px rgba(200, 180, 160, 0.30); }
+
+        .saturn-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotateX(75deg);
+            width: 200%;
+            height: 200%;
+            border: 3px solid rgba(200, 180, 140, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* 控制面板 */
+        .controls {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .control-btn.active {
+            background: rgba(100, 150, 255, 0.3);
+            border-color: rgba(100, 150, 255, 0.6);
+        }
+
+        .speed-control {
+            position: fixed;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .speed-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .speed-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 120px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            transform: rotate(-90deg);
+        }
+
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: linear-gradient(135deg, #a8d4ff 0%, #6B93D6 100%);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .speed-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: #6B93D6;
+        }
+
+        .info-panel {
+            position: fixed;
+            left: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(10, 10, 30, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 18px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            min-width: 180px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .info-panel.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .info-panel h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: white;
+        }
+
+        .info-panel p {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 6px;
+            line-height: 1.5;
+        }
+
+        .info-panel .label {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .legend {
+            position: fixed;
+            right: 25px;
+            bottom: 25px;
+            background: rgba(10, 10, 30, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 12px 15px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .legend-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .inclination-note {
+            position: fixed;
+            left: 25px;
+            bottom: 25px;
+            background: rgba(10, 10, 30, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 12px 15px;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            max-width: 220px;
+        }
+
+        .inclination-note p {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.5;
+        }
+
+        .inclination-note .highlight {
+            color: #9E8B7E;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.3rem; }
+            .time-display { font-size: 1rem; }
+            .legend, .inclination-note { display: none; }
+            .speed-control { right: 10px; }
+            .info-panel { left: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="cosmos"></div>
+    <div class="stars" id="stars"></div>
+
+    <header class="header">
+        <h1>太阳系行星公转</h1>
+        <div class="time-display" id="timeDisplay">00:00:00</div>
+        <div class="date-display" id="dateDisplay">2026年1月11日 星期日</div>
+        <div class="lunar-display" id="lunarDisplay">农历：--</div>
+        <div class="bazi-display" id="baziDisplay">八字：--</div>
+    </header>
+
+    <div class="solar-system-wrapper">
+        <div class="solar-system" id="solarSystem">
+            <div class="sun"></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="control-btn active" id="playBtn">▶ 运行</button>
+        <button class="control-btn" id="pauseBtn">⏸ 暂停</button>
+        <button class="control-btn" id="realTimeBtn">◉ 实时</button>
+        <button class="control-btn active" id="toggleOrbitsBtn">◯ 轨道</button>
+    </div>
+
+    <div class="speed-control">
+        <span class="speed-label">速度</span>
+        <input type="range" class="speed-slider" id="speedSlider" min="0" max="6" step="0.1" value="3">
+        <span class="speed-value" id="speedValue">1天/秒</span>
+    </div>
+
+    <div class="info-panel" id="infoPanel">
+        <h3 id="planetName">地球</h3>
+        <p><span class="label">距太阳:</span> <span id="planetDistance">1 AU</span></p>
+        <p><span class="label">公转周期:</span> <span id="planetPeriod">365天</span></p>
+        <p><span class="label">轨道离心率:</span> <span id="planetEcc">0.017</span></p>
+        <p><span class="label">轨道倾角:</span> <span id="planetInc">0°</span></p>
+    </div>
+
+    <div class="legend">
+        <div class="legend-title">行星图例</div>
+        <div class="legend-item"><div class="legend-dot" style="background: #A6A6A6;"></div>水星</div>
+        <div class="legend-item"><div class="legend-dot" style="background: #DABF8A;"></div>金星</div>
+        <div class="legend-item"><div class="legend-dot" style="background: #2B6CB0;"></div>地球</div>
+        <div class="legend-item"><div class="legend-dot" style="background: #C85B2A;"></div>火星</div>
+        <div class="legend-item"><div class="legend-dot" style="background: #C9A37A;"></div>木星</div>
+        <div class="legend-item"><div class="legend-dot" style="background: #E6D3A8;"></div>土星</div>
+        <div class="legend-item"><div class="legend-dot" style="background: #7FD8E6;"></div>天王星</div>
+        <div class="legend-item"><div class="legend-dot" style="background: #3455D1;"></div>海王星</div>
+        <div class="legend-item"><div class="legend-dot" style="background: #C7B3A0;"></div>冥王星</div>
+    </div>
+
+    <div class="inclination-note">
+        <p>🔸 轨道为椭圆形，基于真实离心率</p>
+        <p>🔸 <span class="highlight">冥王星</span>轨道倾斜17.16°</p>
+        <p>🔸 行星位置基于J2000历元计算</p>
+    </div>
+
+    <!-- 农历/八字：优先使用 lunisolar（需要联网加载）。加载失败会自动降级到 Intl 的农历显示。 -->
+    <script src="https://cdn.jsdelivr.net/npm/lunisolar@2.0.0/dist/lunisolar.min.js"></script>
+
+    <script>
+        // 行星轨道数据（基于J2000历元）
+        // 尺寸按行星半径“相对关系”设置为一组更直观的像素值（不做严格比例缩放）
+        const planets = [
+            { name: '水星', nameEn: 'Mercury', class: 'mercury', a: 0.387, e: 0.2056, i: 7.00, L0: 252.25, n: 4.0923, period: 88, size: 6 },
+            { name: '金星', nameEn: 'Venus', class: 'venus', a: 0.723, e: 0.0068, i: 3.39, L0: 181.98, n: 1.6021, period: 225, size: 9 },
+            { name: '地球', nameEn: 'Earth', class: 'earth', a: 1.000, e: 0.0167, i: 0.00, L0: 100.46, n: 0.9856, period: 365, size: 10 },
+            { name: '火星', nameEn: 'Mars', class: 'mars', a: 1.524, e: 0.0934, i: 1.85, L0: 355.45, n: 0.5240, period: 687, size: 7 },
+            { name: '木星', nameEn: 'Jupiter', class: 'jupiter', a: 5.203, e: 0.0485, i: 1.31, L0: 34.40, n: 0.0831, period: 4333, size: 24 },
+            { name: '土星', nameEn: 'Saturn', class: 'saturn', a: 9.537, e: 0.0556, i: 2.49, L0: 50.08, n: 0.0335, period: 10759, size: 20, hasRing: true },
+            { name: '天王星', nameEn: 'Uranus', class: 'uranus', a: 19.19, e: 0.0472, i: 0.77, L0: 314.20, n: 0.0117, period: 30687, size: 14 },
+            { name: '海王星', nameEn: 'Neptune', class: 'neptune', a: 30.07, e: 0.0086, i: 1.77, L0: 304.22, n: 0.0060, period: 60190, size: 14 },
+            { name: '冥王星', nameEn: 'Pluto', class: 'pluto', a: 39.48, e: 0.2488, i: 17.16, L0: 238.96, n: 0.00397, period: 90560, size: 6 }
+        ];
+
+        // J2000历元
+        const J2000 = new Date(Date.UTC(2000, 0, 1, 12, 0, 0));
+        
+        // 轨道比例参数
+        const MIN_ORBIT = 45; // px，内圈最小半长轴
+        const ORBIT_MARGIN = 70; // px，给UI/太阳留边距
+        let orbitScaleK = 1; // px，log(a+1) 的缩放系数（会根据屏幕自适应）
+
+        // 状态
+        let isRunning = true;
+        let isRealTime = false;
+        let showOrbits = true;
+        let simulatedDate = new Date();
+        let lastTime = performance.now();
+
+        // DOM元素
+        const solarSystem = document.getElementById('solarSystem');
+        const solarSystemWrapper = document.querySelector('.solar-system-wrapper');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const dateDisplay = document.getElementById('dateDisplay');
+        const lunarDisplay = document.getElementById('lunarDisplay');
+        const baziDisplay = document.getElementById('baziDisplay');
+        const speedSlider = document.getElementById('speedSlider');
+        const speedValue = document.getElementById('speedValue');
+        const infoPanel = document.getElementById('infoPanel');
+
+        // 生成星星
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 150; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                const size = Math.random() * 2 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.setProperty('--opacity', Math.random() * 0.5 + 0.5);
+                star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+                star.style.animationDelay = `${Math.random() * 3}s`;
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // 计算屏幕半长轴（使用对数缩放）
+        function getScreenSemiMajorAxis(a) {
+            return MIN_ORBIT + Math.log(a + 1) * orbitScaleK;
+        }
+
+        // 根据当前窗口尺寸自适应缩放，确保最外圈（冥王星）也在视口内
+        function computeOrbitScale() {
+            const rect = (solarSystemWrapper ?? solarSystem).getBoundingClientRect();
+            const maxRadius = Math.max(120, Math.min(rect.width, rect.height) / 2 - ORBIT_MARGIN);
+            const maxA = Math.max(...planets.map(p => p.a));
+            const maxE = Math.max(...planets.map(p => p.e));
+            const baseMax = Math.log(maxA + 1);
+
+            // 最外圈在x方向最大伸展约为 a*(1+e)，因此需要保证 a_screen*(1+e_max) <= maxRadius
+            const maxAScreen = maxRadius / (1 + maxE);
+            const k = (maxAScreen - MIN_ORBIT) / (baseMax || 1);
+            orbitScaleK = Math.max(20, k); // 防止过小导致内圈挤在一起
+        }
+
+        // 从J2000以来的天数
+        function daysSinceJ2000(date) {
+            return (date.getTime() - J2000.getTime()) / (1000 * 60 * 60 * 24);
+        }
+
+        function formatDateTimeForLib(date) {
+            const yyyy = date.getFullYear();
+            const MM = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            const HH = String(date.getHours()).padStart(2, '0');
+            const mm = String(date.getMinutes()).padStart(2, '0');
+            const ss = String(date.getSeconds()).padStart(2, '0');
+            return `${yyyy}-${MM}-${dd} ${HH}:${mm}:${ss}`;
+        }
+
+        function getLunisolar(date) {
+            const fn = (typeof window.lunisolar === 'function')
+                ? window.lunisolar
+                : (window.lunisolar && typeof window.lunisolar.default === 'function')
+                    ? window.lunisolar.default
+                    : null;
+            if (!fn) return null;
+            try { return fn(date); } catch (_) { /* ignore */ }
+            try { return fn(formatDateTimeForLib(date)); } catch (_) { /* ignore */ }
+            return null;
+        }
+
+        function getLunarTextFallback(date) {
+            try {
+                const fmt = new Intl.DateTimeFormat('zh-CN-u-ca-chinese', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                // 在部分浏览器里，year 会是 relatedYear（农历年），month/day 会带中文
+                return fmt.format(date);
+            } catch (_) {
+                return '--';
+            }
+        }
+
+        function updateLunarAndBaZi(date) {
+            // 1) 农历显示：优先用 lunisolar 的完整表达
+            const ls = getLunisolar(date);
+            let lunarText = null;
+            let baziText = null;
+
+            if (ls) {
+                try {
+                    if (ls.lunar && typeof ls.lunar.toString === 'function') {
+                        lunarText = ls.lunar.toString();
+                    }
+                } catch (_) { /* ignore */ }
+
+                try {
+                    if (typeof ls.format === 'function') {
+                        // 年柱 月柱 日柱 时柱（四柱八字）
+                        const pillars = ls.format('cY cM cD cH');
+                        baziText = pillars;
+                    } else if (ls.char8) {
+                        baziText = (typeof ls.char8.toString === 'function') ? ls.char8.toString() : String(ls.char8);
+                    }
+                } catch (_) { /* ignore */ }
+            }
+
+            if (!lunarText) {
+                lunarText = getLunarTextFallback(date);
+            }
+            lunarDisplay.textContent = `农历：${lunarText}`;
+
+            if (baziText) {
+                baziDisplay.textContent = `八字：${baziText}`;
+            } else {
+                baziDisplay.textContent = '八字：加载历法库失败（需联网）';
+            }
+        }
+
+        // 开普勒方程求解偏近点角（牛顿迭代法）
+        function solveKepler(M, e, tolerance = 1e-8) {
+            let E = M;
+            for (let i = 0; i < 30; i++) {
+                const dE = (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+                E -= dE;
+                if (Math.abs(dE) < tolerance) break;
+            }
+            return E;
+        }
+
+        // 计算行星在轨道上的位置（返回屏幕坐标）
+        function getPlanetScreenPosition(planet, date) {
+            const days = daysSinceJ2000(date);
+            
+            // 平均近点角（弧度）
+            const M = ((planet.L0 + planet.n * days) % 360) * Math.PI / 180;
+            
+            // 求解偏近点角
+            const E = solveKepler(M, planet.e);
+            
+            // 屏幕半长轴和半短轴
+            const a_screen = getScreenSemiMajorAxis(planet.a);
+            const b_screen = a_screen * Math.sqrt(1 - planet.e * planet.e);
+            
+            // 椭圆参数方程（以椭圆中心为原点）
+            const x_center = a_screen * Math.cos(E);
+            const y_center = b_screen * Math.sin(E);
+            
+            // 转换到以焦点（太阳）为原点的坐标
+            // 焦点在椭圆中心的右侧 c = a*e 处，所以椭圆中心相对于焦点在 -c 处
+            const c = a_screen * planet.e;
+            const x = x_center - c;  // 相对于太阳（焦点）的x坐标
+            const y = y_center;
+            
+            // 计算当前日心距离（用于信息显示）
+            const r_AU = planet.a * (1 - planet.e * Math.cos(E));
+            
+            return { x, y, r: r_AU, E };
+        }
+
+        // 创建轨道平面（包含轨道线和行星）
+        function createOrbitPlane(planet) {
+            const a_screen = getScreenSemiMajorAxis(planet.a);
+            const b_screen = a_screen * Math.sqrt(1 - planet.e * planet.e);
+            const c = a_screen * planet.e;
+            
+            // 轨道平面容器
+            const plane = document.createElement('div');
+            plane.className = 'orbit-plane';
+            plane.id = `orbit-plane-${planet.class}`;
+            plane.style.transform = `rotateX(${planet.i}deg)`;
+            
+            // 创建椭圆轨道SVG
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const svg = document.createElementNS(svgNS, 'svg');
+            const padding = 5;
+            const width = a_screen * 2 + padding * 2;
+            const height = b_screen * 2 + padding * 2;
+            
+            svg.setAttribute('width', width);
+            svg.setAttribute('height', height);
+            svg.setAttribute('class', 'orbit-path');
+            svg.style.left = `${-a_screen - padding - c}px`;  // 椭圆中心在 -c，左边缘再减 a+padding
+            svg.style.top = `${-b_screen - padding}px`;
+            
+            const ellipse = document.createElementNS(svgNS, 'ellipse');
+            ellipse.setAttribute('cx', a_screen + padding);
+            ellipse.setAttribute('cy', b_screen + padding);
+            ellipse.setAttribute('rx', a_screen);
+            ellipse.setAttribute('ry', b_screen);
+            ellipse.setAttribute('fill', 'none');
+            ellipse.setAttribute('stroke', 'rgba(255, 255, 255, 0.15)');
+            ellipse.setAttribute('stroke-width', '1');
+            
+            svg.appendChild(ellipse);
+            plane.appendChild(svg);
+            
+            // 创建行星
+            const planetEl = document.createElement('div');
+            planetEl.className = `planet ${planet.class}`;
+            planetEl.id = `planet-${planet.class}`;
+            planetEl.style.width = `${planet.size}px`;
+            planetEl.style.height = `${planet.size}px`;
+            planetEl.style.marginLeft = `${-planet.size / 2}px`;
+            planetEl.style.marginTop = `${-planet.size / 2}px`;
+            
+            // 行星标签
+            const label = document.createElement('div');
+            label.className = 'planet-label';
+            label.textContent = planet.name;
+            planetEl.appendChild(label);
+            
+            // 土星光环
+            if (planet.hasRing) {
+                const ring = document.createElement('div');
+                ring.className = 'saturn-ring';
+                planetEl.appendChild(ring);
+            }
+            
+            // 点击显示信息
+            planetEl.addEventListener('click', () => showPlanetInfo(planet));
+            planetEl.addEventListener('mouseenter', () => showPlanetInfo(planet));
+            
+            plane.appendChild(planetEl);
+            
+            return plane;
+        }
+
+        // 初始化太阳系
+        function createSolarSystem() {
+            planets.forEach(planet => {
+                const plane = createOrbitPlane(planet);
+                solarSystem.appendChild(plane);
+            });
+        }
+
+        function rebuildSolarSystem() {
+            // 保留太阳，只重建各行星的轨道平面
+            document.querySelectorAll('.orbit-plane').forEach(el => el.remove());
+            computeOrbitScale();
+            createSolarSystem();
+            updatePlanets(simulatedDate);
+
+            // 维持当前轨道显隐状态
+            document.querySelectorAll('.orbit-path').forEach(orbit => {
+                orbit.style.opacity = showOrbits ? '1' : '0';
+            });
+        }
+
+        // 更新行星位置
+        function updatePlanets(date) {
+            planets.forEach(planet => {
+                const pos = getPlanetScreenPosition(planet, date);
+                const planetEl = document.getElementById(`planet-${planet.class}`);
+                
+                if (planetEl) {
+                    // 行星在轨道平面内移动，只需要x和y
+                    planetEl.style.left = `${pos.x}px`;
+                    planetEl.style.top = `${pos.y}px`;
+                }
+            });
+        }
+
+        // 显示行星信息
+        function showPlanetInfo(planet) {
+            const pos = getPlanetScreenPosition(planet, simulatedDate);
+            
+            document.getElementById('planetName').textContent = `${planet.name} ${planet.nameEn}`;
+            document.getElementById('planetDistance').textContent = `${pos.r.toFixed(3)} AU`;
+            document.getElementById('planetPeriod').textContent = `${planet.period}天`;
+            document.getElementById('planetEcc').textContent = planet.e.toFixed(4);
+            document.getElementById('planetInc').textContent = `${planet.i.toFixed(2)}°`;
+            
+            infoPanel.classList.add('visible');
+            
+            clearTimeout(infoPanel.hideTimeout);
+            infoPanel.hideTimeout = setTimeout(() => {
+                infoPanel.classList.remove('visible');
+            }, 4000);
+        }
+
+        // 更新时间显示
+        function updateTimeDisplay(date) {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            timeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+            
+            const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            dateDisplay.textContent = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${weekdays[date.getDay()]}`;
+        }
+
+        // 速度文本
+        function getSpeedText(value) {
+            if (value === 0) return '暂停';
+            if (value <= 1) return `${value.toFixed(1)}天/秒`;
+            if (value <= 2) return `${Math.round(value)}天/秒`;
+            if (value <= 3) return `${Math.round(value * 7)}天/秒`;
+            if (value <= 4) return `${Math.round((value - 2) * 30)}天/秒`;
+            if (value <= 5) return `${Math.round((value - 3) * 180)}天/秒`;
+            return `${Math.round((value - 4) * 365)}天/秒`;
+        }
+
+        // 天数/秒
+        function getDaysPerSecond(value) {
+            if (value <= 1) return value;
+            if (value <= 2) return value;
+            if (value <= 3) return value * 7;
+            if (value <= 4) return (value - 2) * 30;
+            if (value <= 5) return (value - 3) * 180;
+            return (value - 4) * 365;
+        }
+
+        // 动画循环
+        function animate(currentTime) {
+            const deltaTime = Math.min(currentTime - lastTime, 100); // 限制最大帧间隔
+            lastTime = currentTime;
+            
+            if (isRealTime) {
+                simulatedDate = new Date();
+            } else if (isRunning) {
+                const daysToAdd = getDaysPerSecond(parseFloat(speedSlider.value)) * (deltaTime / 1000);
+                simulatedDate = new Date(simulatedDate.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+            }
+            
+            updatePlanets(simulatedDate);
+            updateTimeDisplay(simulatedDate);
+
+            // 农历/八字不需要每帧更新，按“秒”节流
+            const key = formatDateTimeForLib(simulatedDate);
+            if (key !== animate._lastKey) {
+                animate._lastKey = key;
+                updateLunarAndBaZi(simulatedDate);
+            }
+            
+            requestAnimationFrame(animate);
+        }
+
+        // 事件监听
+        document.getElementById('playBtn').addEventListener('click', function() {
+            isRunning = true;
+            isRealTime = false;
+            this.classList.add('active');
+            document.getElementById('pauseBtn').classList.remove('active');
+            document.getElementById('realTimeBtn').classList.remove('active');
+        });
+
+        document.getElementById('pauseBtn').addEventListener('click', function() {
+            isRunning = false;
+            isRealTime = false;
+            this.classList.add('active');
+            document.getElementById('playBtn').classList.remove('active');
+            document.getElementById('realTimeBtn').classList.remove('active');
+        });
+
+        document.getElementById('realTimeBtn').addEventListener('click', function() {
+            isRealTime = true;
+            isRunning = false;
+            this.classList.add('active');
+            document.getElementById('playBtn').classList.remove('active');
+            document.getElementById('pauseBtn').classList.remove('active');
+            simulatedDate = new Date();
+        });
+
+        document.getElementById('toggleOrbitsBtn').addEventListener('click', function() {
+            showOrbits = !showOrbits;
+            this.classList.toggle('active', showOrbits);
+            document.querySelectorAll('.orbit-path').forEach(orbit => {
+                orbit.style.opacity = showOrbits ? '1' : '0';
+            });
+        });
+
+        speedSlider.addEventListener('input', (e) => {
+            speedValue.textContent = getSpeedText(parseFloat(e.target.value));
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.planet') && !e.target.closest('.info-panel')) {
+                infoPanel.classList.remove('visible');
+            }
+        });
+
+        // 窗口尺寸变化时自适应缩放，确保冥王星也在视口内
+        let resizeRaf = 0;
+        window.addEventListener('resize', () => {
+            if (resizeRaf) cancelAnimationFrame(resizeRaf);
+            resizeRaf = requestAnimationFrame(() => {
+                resizeRaf = 0;
+                rebuildSolarSystem();
+            });
+        });
+
+        // 初始化
+        createStars();
+        simulatedDate = new Date();
+        computeOrbitScale();
+        createSolarSystem();
+        updatePlanets(simulatedDate);
+        speedValue.textContent = getSpeedText(3);
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>
