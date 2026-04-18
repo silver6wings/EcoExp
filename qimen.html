@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>奇门遁甲四盘框架</title>
+    <style>
+        :root {
+            --bg-1: #06070d;
+            --bg-2: #151222;
+            --bg-3: #231931;
+            --panel: rgba(16, 12, 25, 0.78);
+            --panel-soft: rgba(255, 247, 227, 0.06);
+            --line: rgba(224, 188, 124, 0.20);
+            --line-strong: rgba(237, 211, 161, 0.42);
+            --text-main: #f2e4c5;
+            --text-soft: rgba(242, 228, 197, 0.72);
+            --text-dim: rgba(242, 228, 197, 0.52);
+            --gold: #e2b96f;
+            --cyan: #8acbff;
+            --violet: #b597ff;
+            --wood: #5fbe79;
+            --fire: #e08168;
+            --earth: #dbbe69;
+            --metal: #dde2ea;
+            --water: #6b92d7;
+            --shadow: 0 28px 60px rgba(0, 0, 0, 0.34);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            color: var(--text-main);
+            font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+            background:
+                radial-gradient(circle at 50% 16%, rgba(226, 185, 111, 0.12), transparent 22%),
+                radial-gradient(circle at 16% 18%, rgba(138, 203, 255, 0.10), transparent 24%),
+                radial-gradient(circle at 84% 10%, rgba(181, 151, 255, 0.12), transparent 24%),
+                linear-gradient(180deg, var(--bg-2), var(--bg-1));
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                radial-gradient(circle at 9% 20%, rgba(255, 255, 255, 0.42) 0 1px, transparent 1.7px),
+                radial-gradient(circle at 25% 12%, rgba(255, 248, 234, 0.36) 0 0.9px, transparent 1.6px),
+                radial-gradient(circle at 38% 28%, rgba(196, 222, 255, 0.28) 0 0.85px, transparent 1.5px),
+                radial-gradient(circle at 58% 16%, rgba(255, 255, 255, 0.32) 0 0.95px, transparent 1.6px),
+                radial-gradient(circle at 74% 24%, rgba(196, 222, 255, 0.26) 0 0.85px, transparent 1.5px),
+                radial-gradient(circle at 88% 14%, rgba(255, 243, 218, 0.34) 0 0.95px, transparent 1.6px),
+                radial-gradient(circle at 12% 76%, rgba(255, 255, 255, 0.24) 0 0.8px, transparent 1.4px),
+                radial-gradient(circle at 36% 88%, rgba(196, 222, 255, 0.20) 0 0.7px, transparent 1.3px),
+                radial-gradient(circle at 62% 78%, rgba(255, 243, 218, 0.24) 0 0.82px, transparent 1.4px),
+                radial-gradient(circle at 84% 84%, rgba(255, 255, 255, 0.18) 0 0.72px, transparent 1.3px);
+            opacity: 0.78;
+        }
+
+        .app {
+            width: min(1360px, calc(100vw - 28px));
+            margin: 0 auto;
+            padding: 28px 0 42px;
+        }
+
+        .hero {
+            margin-bottom: 18px;
+            padding: 22px 24px;
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            background:
+                linear-gradient(180deg, rgba(255, 245, 222, 0.06), rgba(255, 245, 222, 0.02)),
+                rgba(14, 10, 23, 0.76);
+            box-shadow: var(--shadow);
+        }
+
+        .hero h1 {
+            font-size: clamp(1.75rem, 2.7vw, 2.5rem);
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            max-width: 900px;
+            color: var(--text-soft);
+            line-height: 1.8;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .board-shell,
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            background:
+                linear-gradient(180deg, rgba(255, 247, 227, 0.04), rgba(255, 247, 227, 0.02)),
+                var(--panel);
+            box-shadow: var(--shadow);
+        }
+
+        .board-shell {
+            padding: 20px;
+        }
+
+        .board-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .board-head h2,
+        .panel h2 {
+            font-size: 1rem;
+            letter-spacing: 0.12em;
+            color: #f7e8c8;
+        }
+
+        .board-subtitle {
+            color: var(--text-dim);
+            font-size: 0.92rem;
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .chip {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(237, 211, 161, 0.18);
+            background: rgba(255, 246, 228, 0.05);
+            color: var(--text-soft);
+            font-size: 0.82rem;
+            letter-spacing: 0.04em;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .palace {
+            min-height: 216px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 22px;
+            border: 1px solid rgba(237, 211, 161, 0.14);
+            background:
+                linear-gradient(180deg, rgba(255, 247, 227, 0.05), rgba(255, 247, 227, 0.01)),
+                rgba(8, 10, 18, 0.54);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .palace::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 18% 18%, rgba(226, 185, 111, 0.10), transparent 30%),
+                linear-gradient(135deg, rgba(138, 203, 255, 0.05), transparent 46%);
+            pointer-events: none;
+        }
+
+        .palace--center {
+            background:
+                linear-gradient(180deg, rgba(255, 247, 227, 0.08), rgba(255, 247, 227, 0.03)),
+                rgba(28, 18, 16, 0.62);
+            border-color: rgba(237, 211, 161, 0.22);
+        }
+
+        .palace-head,
+        .palace-foot,
+        .layer {
+            position: relative;
+            z-index: 1;
+        }
+
+        .palace-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .palace-title {
+            display: grid;
+            gap: 2px;
+        }
+
+        .palace-title strong {
+            font-size: 1rem;
+        }
+
+        .palace-title span {
+            color: var(--text-dim);
+            font-size: 0.84rem;
+        }
+
+        .palace-no {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            color: #120d10;
+            background: linear-gradient(180deg, #f7e8c8, #dfb66a);
+            box-shadow: 0 0 18px rgba(226, 185, 111, 0.22);
+        }
+
+        .layer-stack {
+            display: grid;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .layer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .layer-label {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            letter-spacing: 0.06em;
+        }
+
+        .layer-value {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .layer-extra {
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            color: rgba(19, 16, 22, 0.92);
+            background: rgba(247, 232, 201, 0.9);
+        }
+
+        .layer--god { border-color: rgba(181, 151, 255, 0.24); }
+        .layer--star { border-color: rgba(138, 203, 255, 0.24); }
+        .layer--door { border-color: rgba(95, 190, 121, 0.24); }
+        .layer--earth { border-color: rgba(226, 185, 111, 0.24); }
+
+        .layer--god .layer-value { color: #d7c6ff; }
+        .layer--star .layer-value { color: #b7ddff; }
+        .layer--door .layer-value { color: #9be0af; }
+        .layer--earth .layer-value { color: #f0d39b; }
+
+        .palace-foot {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(237, 211, 161, 0.20);
+            background: rgba(255, 247, 227, 0.06);
+            color: var(--text-soft);
+            font-size: 0.78rem;
+        }
+
+        .badge--chief {
+            color: #20150b;
+            background: linear-gradient(180deg, #f7e8c8, #dfb66a);
+            border-color: rgba(255, 244, 221, 0.48);
+        }
+
+        .badge--warn {
+            background: rgba(224, 129, 104, 0.16);
+            border-color: rgba(224, 129, 104, 0.28);
+        }
+
+        .side {
+            display: grid;
+            gap: 18px;
+        }
+
+        .panel {
+            padding: 18px;
+        }
+
+        .panel h2 {
+            margin-bottom: 14px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .field {
+            display: grid;
+            gap: 6px;
+        }
+
+        .field--span {
+            grid-column: 1 / -1;
+        }
+
+        .field label {
+            color: var(--text-dim);
+            font-size: 0.86rem;
+        }
+
+        .field select,
+        .field input,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid rgba(237, 211, 161, 0.14);
+            border-radius: 14px;
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.04);
+            font: inherit;
+        }
+
+        .field select:focus,
+        .field input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: rgba(237, 211, 161, 0.32);
+            box-shadow: 0 0 0 3px rgba(226, 185, 111, 0.08);
+        }
+
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        button {
+            padding: 10px 14px;
+            border: 1px solid rgba(237, 211, 161, 0.18);
+            border-radius: 999px;
+            color: var(--text-main);
+            background:
+                linear-gradient(180deg, rgba(255, 247, 227, 0.08), rgba(255, 247, 227, 0.03)),
+                rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+            font: inherit;
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            border-color: rgba(237, 211, 161, 0.34);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+        }
+
+        .summary-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .summary-item {
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(237, 211, 161, 0.10);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .summary-item strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #f5e8cd;
+        }
+
+        .summary-item span {
+            color: var(--text-soft);
+            line-height: 1.72;
+            font-size: 0.92rem;
+        }
+
+        .rule-list,
+        .trace-list {
+            display: grid;
+            gap: 10px;
+            color: var(--text-soft);
+            line-height: 1.78;
+            font-size: 0.93rem;
+        }
+
+        .trace-list {
+            list-style: none;
+        }
+
+        .trace-list li {
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(237, 211, 161, 0.10);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .legend span {
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .legend .god { color: #d7c6ff; border-color: rgba(181, 151, 255, 0.24); }
+        .legend .star { color: #b7ddff; border-color: rgba(138, 203, 255, 0.24); }
+        .legend .door { color: #9be0af; border-color: rgba(95, 190, 121, 0.24); }
+        .legend .earth { color: #f0d39b; border-color: rgba(226, 185, 111, 0.24); }
+
+        .footer-note {
+            margin-top: 18px;
+            color: var(--text-dim);
+            line-height: 1.8;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1120px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .app {
+                width: min(100vw - 16px, 100%);
+                padding-top: 16px;
+            }
+
+            .hero,
+            .board-shell,
+            .panel {
+                border-radius: 20px;
+            }
+
+            .board-head {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .chip-row {
+                justify-content: flex-start;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .palace {
+                min-height: 196px;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="app">
+        <section class="hero">
+            <h1>奇门遁甲四盘框架</h1>
+            <p>
+                这个版本先把九宫与四盘结构搭出来：地盘三奇六仪、天盘九星与天干、人盘八门、神盘八神分层显示，
+                同时把阴阳遁、局数、旬首、值符、值使等参数拆成独立规则函数，便于后续继续接入节气、拆补、置闰和时家自动排盘。
+            </p>
+        </section>
+
+        <section class="workspace">
+            <section class="board-shell">
+                <div class="board-head">
+                    <div>
+                        <h2>九宫四盘</h2>
+                        <div class="board-subtitle" id="boardSubtitle">以局数定地盘，以值符定天盘，以值使定人盘，以阴阳遁定顺逆。</div>
+                    </div>
+                    <div class="chip-row" id="boardChips"></div>
+                </div>
+                <div class="board" id="board"></div>
+                <div class="footer-note" id="boardNote"></div>
+            </section>
+
+            <aside class="side">
+                <section class="panel">
+                    <h2>基础参数</h2>
+                    <div class="form-grid">
+                        <div class="field field--span">
+                            <label for="presetSelect">示例局</label>
+                            <select id="presetSelect"></select>
+                        </div>
+                        <div class="field">
+                            <label for="dunSelect">遁法</label>
+                            <select id="dunSelect"></select>
+                        </div>
+                        <div class="field">
+                            <label for="juSelect">局数</label>
+                            <select id="juSelect"></select>
+                        </div>
+                        <div class="field">
+                            <label for="xunshouSelect">旬首</label>
+                            <select id="xunshouSelect"></select>
+                        </div>
+                        <div class="field">
+                            <label for="chiefStarSelect">值符星</label>
+                            <select id="chiefStarSelect"></select>
+                        </div>
+                        <div class="field">
+                            <label for="chiefDoorSelect">值使门</label>
+                            <select id="chiefDoorSelect"></select>
+                        </div>
+                        <div class="field">
+                            <label for="chiefStarPalaceSelect">值符宫</label>
+                            <select id="chiefStarPalaceSelect"></select>
+                        </div>
+                        <div class="field">
+                            <label for="chiefDoorPalaceSelect">值使宫</label>
+                            <select id="chiefDoorPalaceSelect"></select>
+                        </div>
+                        <div class="field field--span">
+                            <label for="noteInput">备注</label>
+                            <input id="noteInput" type="text" placeholder="例如：后续可接节气与时干自动求值符值使">
+                        </div>
+                    </div>
+                    <div class="button-row">
+                        <button type="button" id="applyButton">应用当前参数</button>
+                        <button type="button" id="nextPresetButton">下一个示例</button>
+                        <button type="button" id="resetButton">回到框架初始盘</button>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <h2>排盘摘要</h2>
+                    <div class="summary-grid" id="summary"></div>
+                </section>
+
+                <section class="panel">
+                    <h2>规则边界</h2>
+                    <div class="rule-list">
+                        <div>1. 当前版本先实现“四盘骨架”和“顺逆飞布的可视化联动”，让后续算法能有清晰挂载点。</div>
+                        <div>2. 地盘以局数起宫排三奇六仪；天盘以旬首所领之仪与值符宫联动；人盘以值使门落宫飞布；神盘随阴阳遁顺逆而转。</div>
+                        <div>3. 中五宫暂作为框架信息位，未做寄宫、寄禽与各家流派细分处理。</div>
+                        <div>4. 节气定阴阳遁、拆补置闰、旬空、时干求值符值使等精确规则，后面可以继续补到 `derive*` 系列函数里。</div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <h2>图层说明</h2>
+                    <div class="legend">
+                        <span class="god">神盘：八神</span>
+                        <span class="star">天盘：九星 / 天干</span>
+                        <span class="door">人盘：八门</span>
+                        <span class="earth">地盘：三奇六仪</span>
+                    </div>
+                </section>
+            </aside>
+        </section>
+
+        <section class="panel" style="margin-top: 18px;">
+            <h2>推演日志</h2>
+            <ol class="trace-list" id="trace"></ol>
+        </section>
+    </main>
+
+    <script>
+        const PALACE_GRID = [4, 9, 2, 3, 5, 7, 8, 1, 6];
+        const OUTER_RING = [1, 8, 3, 4, 9, 2, 7, 6];
+        const EARTH_CYCLE = [1, 8, 3, 4, 9, 2, 7, 6, 5];
+        const DUN_OPTIONS = ["阳遁", "阴遁"];
+        const EARTH_STEMS = ["戊", "己", "庚", "辛", "壬", "癸", "丁", "丙", "乙"];
+        const STAR_SEQUENCE = ["天蓬", "天任", "天冲", "天辅", "天英", "天芮", "天柱", "天心"];
+        const DOOR_SEQUENCE = ["休门", "生门", "伤门", "杜门", "景门", "死门", "惊门", "开门"];
+        const GOD_SEQUENCE = ["值符", "螣蛇", "太阴", "六合", "白虎", "玄武", "九地", "九天"];
+
+        const XUN_SHOU_LIST = [
+            { label: "甲子戊", stem: "戊" },
+            { label: "甲戌己", stem: "己" },
+            { label: "甲申庚", stem: "庚" },
+            { label: "甲午辛", stem: "辛" },
+            { label: "甲辰壬", stem: "壬" },
+            { label: "甲寅癸", stem: "癸" }
+        ];
+
+        const XUN_SHOU_MAP = Object.fromEntries(
+            XUN_SHOU_LIST.map((item) => [item.label, item.stem])
+        );
+
+        const PALACE_META = {
+            1: { name: "坎", title: "坎一宫", direction: "北", palaceText: "水地", element: "水" },
+            2: { name: "坤", title: "坤二宫", direction: "西南", palaceText: "土地", element: "土" },
+            3: { name: "震", title: "震三宫", direction: "东", palaceText: "木地", element: "木" },
+            4: { name: "巽", title: "巽四宫", direction: "东南", palaceText: "木地", element: "木" },
+            5: { name: "中", title: "中五宫", direction: "中", palaceText: "中土", element: "土" },
+            6: { name: "乾", title: "乾六宫", direction: "西北", palaceText: "金地", element: "金" },
+            7: { name: "兑", title: "兑七宫", direction: "西", palaceText: "金地", element: "金" },
+            8: { name: "艮", title: "艮八宫", direction: "东北", palaceText: "土地", element: "土" },
+            9: { name: "离", title: "离九宫", direction: "南", palaceText: "火地", element: "火" }
+        };
+
+        const PRESETS = [
+            {
+                name: "框架初始盘",
+                dun: "阳遁",
+                ju: 1,
+                xunshou: "甲子戊",
+                chiefStar: "天蓬",
+                chiefDoor: "休门",
+                chiefStarPalace: 1,
+                chiefDoorPalace: 1,
+                note: "从最基础的阳遁一局起盘，先确认四盘联动与九宫布局。"
+            },
+            {
+                name: "阳遁四局",
+                dun: "阳遁",
+                ju: 4,
+                xunshou: "甲申庚",
+                chiefStar: "天辅",
+                chiefDoor: "杜门",
+                chiefStarPalace: 4,
+                chiefDoorPalace: 4,
+                note: "演示值符落巽四宫时，天盘、神盘如何同步旋转。"
+            },
+            {
+                name: "阳遁七局",
+                dun: "阳遁",
+                ju: 7,
+                xunshou: "甲辰壬",
+                chiefStar: "天柱",
+                chiefDoor: "惊门",
+                chiefStarPalace: 7,
+                chiefDoorPalace: 7,
+                note: "适合观察地盘起宫位置改变后，天盘和人盘的分离关系。"
+            },
+            {
+                name: "阴遁六局",
+                dun: "阴遁",
+                ju: 6,
+                xunshou: "甲寅癸",
+                chiefStar: "天心",
+                chiefDoor: "开门",
+                chiefStarPalace: 6,
+                chiefDoorPalace: 6,
+                note: "演示阴遁逆飞时，神盘与八门的逆序分布。"
+            }
+        ];
+
+        const state = {
+            presetIndex: 0,
+            config: { ...PRESETS[0] }
+        };
+
+        const dom = {
+            board: document.getElementById("board"),
+            boardSubtitle: document.getElementById("boardSubtitle"),
+            boardChips: document.getElementById("boardChips"),
+            boardNote: document.getElementById("boardNote"),
+            summary: document.getElementById("summary"),
+            trace: document.getElementById("trace"),
+            presetSelect: document.getElementById("presetSelect"),
+            dunSelect: document.getElementById("dunSelect"),
+            juSelect: document.getElementById("juSelect"),
+            xunshouSelect: document.getElementById("xunshouSelect"),
+            chiefStarSelect: document.getElementById("chiefStarSelect"),
+            chiefDoorSelect: document.getElementById("chiefDoorSelect"),
+            chiefStarPalaceSelect: document.getElementById("chiefStarPalaceSelect"),
+            chiefDoorPalaceSelect: document.getElementById("chiefDoorPalaceSelect"),
+            noteInput: document.getElementById("noteInput"),
+            applyButton: document.getElementById("applyButton"),
+            nextPresetButton: document.getElementById("nextPresetButton"),
+            resetButton: document.getElementById("resetButton")
+        };
+
+        function mod(value, base) {
+            return ((value % base) + base) % base;
+        }
+
+        function directionFromDun(dun) {
+            return dun === "阳遁" ? 1 : -1;
+        }
+
+        function getPalaceMeta(palace) {
+            return PALACE_META[Number(palace)];
+        }
+
+        function getPalaceLabel(palace) {
+            return getPalaceMeta(palace).title;
+        }
+
+        function populateSelect(select, options, getLabel = (value) => value) {
+            select.innerHTML = options
+                .map((value) => `<option value="${value}">${getLabel(value)}</option>`)
+                .join("");
+        }
+
+        function rotateArray(list, startValue) {
+            const index = list.indexOf(startValue);
+            if (index < 0) {
+                return list.slice();
+            }
+            return list.slice(index).concat(list.slice(0, index));
+        }
+
+        function getDirectionalRing(startPalace, direction) {
+            const source = direction === 1 ? OUTER_RING : [...OUTER_RING].reverse();
+            return rotateArray(source, Number(startPalace));
+        }
+
+        function buildSequenceMap(sequence, startItem, startPalace, direction) {
+            const itemOrder = rotateArray(sequence, startItem);
+            const palaceOrder = getDirectionalRing(startPalace, direction);
+            const result = {};
+
+            palaceOrder.forEach((palace, index) => {
+                result[palace] = itemOrder[index];
+            });
+
+            return result;
+        }
+
+        function getEarthCycle(startPalace, direction) {
+            const source = direction === 1 ? EARTH_CYCLE : [...EARTH_CYCLE].reverse();
+            return rotateArray(source, Number(startPalace));
+        }
+
+        function deriveEarthPlate(config) {
+            const result = {};
+            const palaceOrder = getEarthCycle(config.ju, directionFromDun(config.dun));
+
+            EARTH_STEMS.forEach((stem, index) => {
+                result[palaceOrder[index]] = stem;
+            });
+
+            return result;
+        }
+
+        function deriveHeavenPlate(config) {
+            const direction = directionFromDun(config.dun);
+            const chiefStem = XUN_SHOU_MAP[config.xunshou] || "戊";
+
+            return {
+                stars: {
+                    ...buildSequenceMap(STAR_SEQUENCE, config.chiefStar, config.chiefStarPalace, direction),
+                    5: "天禽"
+                },
+                stems: {
+                    ...buildSequenceMap(EARTH_STEMS, chiefStem, config.chiefStarPalace, direction),
+                    5: chiefStem
+                }
+            };
+        }
+
+        function deriveDoorPlate(config) {
+            return {
+                ...buildSequenceMap(
+                    DOOR_SEQUENCE,
+                    config.chiefDoor,
+                    config.chiefDoorPalace,
+                    directionFromDun(config.dun)
+                ),
+                5: "寄宫待定"
+            };
+        }
+
+        function deriveGodPlate(config) {
+            return {
+                ...buildSequenceMap(
+                    GOD_SEQUENCE,
+                    "值符",
+                    config.chiefStarPalace,
+                    directionFromDun(config.dun)
+                ),
+                5: "中宫不布"
+            };
+        }
+
+        function buildTrace(config) {
+            const directionText = config.dun === "阳遁" ? "顺布" : "逆布";
+            const chiefStem = XUN_SHOU_MAP[config.xunshou] || "戊";
+
+            return [
+                `地盘：以 ${config.dun}${config.ju}局 为起点，${EARTH_STEMS[0]} 从 ${getPalaceLabel(config.ju)} 起，按 ${directionText} 排出三奇六仪。`,
+                `天盘：先由旬首 ${config.xunshou} 取所领之仪 ${chiefStem}，再以值符星 ${config.chiefStar} 落 ${getPalaceLabel(config.chiefStarPalace)} 作为旋转起点。`,
+                `人盘：值使门 ${config.chiefDoor} 落 ${getPalaceLabel(config.chiefDoorPalace)}，其余八门依 ${config.dun} 的顺逆方向飞布。`,
+                `神盘：以值符宫为神盘起点，八神按 ${config.dun === "阳遁" ? "阳顺" : "阴逆"} 排列，便于后续接入值符、值使自动求取。`,
+                `边界：当前中心宫只保留寄宫提示，尚未细化各家寄禽寄门规则；节气、时干、旬空和拆补置闰也尚未自动参与计算。`
+            ];
+        }
+
+        function buildSummary(config) {
+            return [
+                {
+                    title: "排盘骨架",
+                    text: `${config.dun}${config.ju}局，值符 ${config.chiefStar} 在 ${getPalaceLabel(config.chiefStarPalace)}，值使 ${config.chiefDoor} 在 ${getPalaceLabel(config.chiefDoorPalace)}。`
+                },
+                {
+                    title: "旬首挂点",
+                    text: `${config.xunshou} 用来确定值符所领之仪，当前框架以它作为天盘三奇六仪的起始标记。`
+                },
+                {
+                    title: "可扩展点",
+                    text: "后续只要把节气换算、时干推符使、寄宫规则补进 deriveEarthPlate / deriveHeavenPlate / deriveDoorPlate / deriveGodPlate 即可。"
+                }
+            ];
+        }
+
+        function buildBadges(config, palace) {
+            const badges = [];
+
+            if (Number(config.ju) === palace) {
+                badges.push({ text: "局首", kind: "" });
+            }
+
+            if (Number(config.chiefStarPalace) === palace) {
+                badges.push({ text: "值符", kind: "badge--chief" });
+            }
+
+            if (Number(config.chiefDoorPalace) === palace) {
+                badges.push({ text: "值使", kind: "badge--chief" });
+            }
+
+            if (palace === 5) {
+                badges.push({ text: "中宫", kind: "badge--warn" });
+            }
+
+            return badges;
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;");
+        }
+
+        function renderBoard(frame) {
+            dom.board.innerHTML = PALACE_GRID.map((palace) => {
+                const meta = getPalaceMeta(palace);
+                const badges = buildBadges(frame.config, palace);
+                const isCenter = palace === 5;
+                const heavenStar = frame.heaven.stars[palace];
+                const heavenStem = frame.heaven.stems[palace];
+                const god = frame.gods[palace];
+                const door = frame.doors[palace];
+                const earth = frame.earth[palace];
+
+                return `
+                    <article class="palace ${isCenter ? "palace--center" : ""}">
+                        <div class="palace-head">
+                            <div class="palace-title">
+                                <strong>${meta.title}</strong>
+                                <span>${meta.direction} · ${meta.palaceText}</span>
+                            </div>
+                            <div class="palace-no">${palace}</div>
+                        </div>
+                        <div class="layer-stack">
+                            <div class="layer layer--god">
+                                <div class="layer-label">神盘</div>
+                                <div class="layer-value">${escapeHtml(god)}</div>
+                            </div>
+                            <div class="layer layer--star">
+                                <div class="layer-label">天盘</div>
+                                <div class="layer-value">
+                                    <span>${escapeHtml(heavenStar)}</span>
+                                    <span class="layer-extra">${escapeHtml(heavenStem)}</span>
+                                </div>
+                            </div>
+                            <div class="layer layer--door">
+                                <div class="layer-label">人盘</div>
+                                <div class="layer-value">${escapeHtml(door)}</div>
+                            </div>
+                            <div class="layer layer--earth">
+                                <div class="layer-label">地盘</div>
+                                <div class="layer-value">${escapeHtml(earth)}</div>
+                            </div>
+                        </div>
+                        <div class="palace-foot">
+                            ${badges.map((item) => `<span class="badge ${item.kind}">${item.text}</span>`).join("")}
+                        </div>
+                    </article>
+                `;
+            }).join("");
+        }
+
+        function renderSummary(items) {
+            dom.summary.innerHTML = items.map((item) => `
+                <div class="summary-item">
+                    <strong>${escapeHtml(item.title)}</strong>
+                    <span>${escapeHtml(item.text)}</span>
+                </div>
+            `).join("");
+        }
+
+        function renderTrace(items) {
+            dom.trace.innerHTML = items.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+        }
+
+        function renderBoardHeader(config) {
+            dom.boardSubtitle.textContent = `当前为 ${config.dun}${config.ju}局，值符 ${config.chiefStar} 落 ${getPalaceLabel(config.chiefStarPalace)}，值使 ${config.chiefDoor} 落 ${getPalaceLabel(config.chiefDoorPalace)}。`;
+            dom.boardChips.innerHTML = [
+                `旬首 ${config.xunshou}`,
+                `值符 ${config.chiefStar}`,
+                `值使 ${config.chiefDoor}`,
+                `${config.dun}${config.ju}局`
+            ].map((text) => `<span class="chip">${escapeHtml(text)}</span>`).join("");
+            dom.boardNote.textContent = config.note || "这是一个框架版奇门盘，重点是把四盘和规则入口拆分清楚，便于继续补自动排盘。";
+        }
+
+        function buildFrame(config) {
+            return {
+                config,
+                earth: deriveEarthPlate(config),
+                heaven: deriveHeavenPlate(config),
+                doors: deriveDoorPlate(config),
+                gods: deriveGodPlate(config)
+            };
+        }
+
+        function readConfigFromForm() {
+            return {
+                name: state.config.name,
+                dun: dom.dunSelect.value,
+                ju: Number(dom.juSelect.value),
+                xunshou: dom.xunshouSelect.value,
+                chiefStar: dom.chiefStarSelect.value,
+                chiefDoor: dom.chiefDoorSelect.value,
+                chiefStarPalace: Number(dom.chiefStarPalaceSelect.value),
+                chiefDoorPalace: Number(dom.chiefDoorPalaceSelect.value),
+                note: dom.noteInput.value.trim()
+            };
+        }
+
+        function writeConfigToForm(config) {
+            dom.dunSelect.value = config.dun;
+            dom.juSelect.value = String(config.ju);
+            dom.xunshouSelect.value = config.xunshou;
+            dom.chiefStarSelect.value = config.chiefStar;
+            dom.chiefDoorSelect.value = config.chiefDoor;
+            dom.chiefStarPalaceSelect.value = String(config.chiefStarPalace);
+            dom.chiefDoorPalaceSelect.value = String(config.chiefDoorPalace);
+            dom.noteInput.value = config.note || "";
+        }
+
+        function refresh(customName = "自定义盘") {
+            const nextConfig = readConfigFromForm();
+            state.config = {
+                ...nextConfig,
+                name: customName
+            };
+
+            const frame = buildFrame(state.config);
+            renderBoard(frame);
+            renderBoardHeader(state.config);
+            renderSummary(buildSummary(state.config));
+            renderTrace(buildTrace(state.config));
+            dom.presetSelect.value = customName;
+        }
+
+        function applyPreset(index) {
+            const preset = PRESETS[index];
+            if (!preset) {
+                return;
+            }
+
+            state.presetIndex = index;
+            state.config = { ...preset };
+            writeConfigToForm(state.config);
+
+            const frame = buildFrame(state.config);
+            renderBoard(frame);
+            renderBoardHeader(state.config);
+            renderSummary(buildSummary(state.config));
+            renderTrace(buildTrace(state.config));
+            dom.presetSelect.value = preset.name;
+        }
+
+        function initSelects() {
+            populateSelect(dom.dunSelect, DUN_OPTIONS);
+            populateSelect(dom.juSelect, [1, 2, 3, 4, 5, 6, 7, 8, 9], (value) => `${value}局`);
+            populateSelect(dom.xunshouSelect, XUN_SHOU_LIST.map((item) => item.label));
+            populateSelect(dom.chiefStarSelect, STAR_SEQUENCE);
+            populateSelect(dom.chiefDoorSelect, DOOR_SEQUENCE);
+            populateSelect(dom.chiefStarPalaceSelect, OUTER_RING, (value) => getPalaceLabel(value));
+            populateSelect(dom.chiefDoorPalaceSelect, OUTER_RING, (value) => getPalaceLabel(value));
+
+            dom.presetSelect.innerHTML = [
+                ...PRESETS.map((item) => `<option value="${item.name}">${item.name}</option>`),
+                `<option value="自定义盘">自定义盘</option>`
+            ].join("");
+        }
+
+        function initEvents() {
+            dom.applyButton.addEventListener("click", () => {
+                refresh();
+            });
+
+            dom.nextPresetButton.addEventListener("click", () => {
+                const nextIndex = mod(state.presetIndex + 1, PRESETS.length);
+                applyPreset(nextIndex);
+            });
+
+            dom.resetButton.addEventListener("click", () => {
+                applyPreset(0);
+            });
+
+            dom.presetSelect.addEventListener("change", (event) => {
+                const index = PRESETS.findIndex((item) => item.name === event.target.value);
+                if (index >= 0) {
+                    applyPreset(index);
+                }
+            });
+
+            [
+                dom.dunSelect,
+                dom.juSelect,
+                dom.xunshouSelect,
+                dom.chiefStarSelect,
+                dom.chiefDoorSelect,
+                dom.chiefStarPalaceSelect,
+                dom.chiefDoorPalaceSelect,
+                dom.noteInput
+            ].forEach((element) => {
+                element.addEventListener("change", () => refresh());
+                element.addEventListener("input", () => {
+                    if (element === dom.noteInput) {
+                        refresh();
+                    }
+                });
+            });
+        }
+
+        initSelects();
+        initEvents();
+        applyPreset(0);
+    </script>
+</body>
+</html>
