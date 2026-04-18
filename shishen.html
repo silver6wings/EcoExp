@@ -641,8 +641,68 @@
 
         input[type="range"] {
             width: 100%;
-            accent-color: #d3aa5a;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 20px;
+            border-radius: 999px;
+            background: transparent;
+            accent-color: var(--slider-active, #f9fbff);
             cursor: pointer;
+            --slider-active: #f9fbff;
+            --slider-progress: 0%;
+            --slider-halo: rgba(255, 255, 255, 0.32);
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 6px;
+            border-radius: 999px;
+            background:
+                linear-gradient(
+                    90deg,
+                    var(--slider-active) 0%,
+                    var(--slider-active) var(--slider-progress),
+                    rgba(255, 255, 255, 0.18) var(--slider-progress),
+                    rgba(255, 255, 255, 0.18) 100%
+                );
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            margin-top: -6px;
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            border-radius: 50%;
+            background: var(--slider-active);
+            box-shadow: 0 0 16px var(--slider-halo);
+            transition: background 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        input[type="range"]::-moz-range-track {
+            height: 6px;
+            border: none;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+        }
+
+        input[type="range"]::-moz-range-progress {
+            height: 6px;
+            border-radius: 999px;
+            background: var(--slider-active);
+            box-shadow: 0 0 12px var(--slider-halo);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.72);
+            border-radius: 50%;
+            background: var(--slider-active);
+            box-shadow: 0 0 16px var(--slider-halo);
+            transition: background 0.18s ease, box-shadow 0.18s ease;
         }
 
         .hint-text {
@@ -902,6 +962,18 @@
             return ((Math.round(-normalizedInner / 36) % 10) + 10) % 10;
         }
 
+        function updateSliderTone() {
+            const currentStem = stems[getTopStemIndex()];
+            const isYang = currentStem.label.startsWith("阳");
+            const sliderValue = Number(innerSlider.value);
+            const maxValue = Number(innerSlider.max) || 1;
+            const progress = `${(sliderValue / maxValue) * 100}%`;
+
+            innerSlider.style.setProperty("--slider-active", isYang ? "#f8fbff" : "#cfd4db");
+            innerSlider.style.setProperty("--slider-halo", isYang ? "rgba(255, 255, 255, 0.42)" : "rgba(215, 220, 228, 0.24)");
+            innerSlider.style.setProperty("--slider-progress", progress);
+        }
+
         function updateGodRing(animate = true) {
             const dayStem = stems[getTopStemIndex()];
             const isYang = dayStem.label.startsWith("阳");
@@ -956,6 +1028,7 @@
             starGroup.style.transform = `rotate(${state.inner}deg)`;
             innerSlider.value = String(state.innerTarget / 36);
             keepInnerItemsUpright();
+            updateSliderTone();
             updateGodRing(animateGods);
         }
 
