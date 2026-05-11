@@ -3,27 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>奇门遁甲四盘框架</title>
+    <title>奇门遁甲四盘同心圆</title>
     <style>
         :root {
             --bg-1: #06070d;
             --bg-2: #151222;
-            --bg-3: #231931;
             --panel: rgba(16, 12, 25, 0.78);
-            --panel-soft: rgba(255, 247, 227, 0.06);
             --line: rgba(224, 188, 124, 0.20);
             --line-strong: rgba(237, 211, 161, 0.42);
             --text-main: #f2e4c5;
             --text-soft: rgba(242, 228, 197, 0.72);
             --text-dim: rgba(242, 228, 197, 0.52);
             --gold: #e2b96f;
-            --cyan: #8acbff;
-            --violet: #b597ff;
-            --wood: #5fbe79;
-            --fire: #e08168;
-            --earth: #dbbe69;
-            --metal: #dde2ea;
-            --water: #6b92d7;
+            --god: #d7c6ff;
+            --star: #b7ddff;
+            --door: #9be0af;
+            --earth: #f0d39b;
             --shadow: 0 28px 60px rgba(0, 0, 0, 0.34);
         }
 
@@ -38,9 +33,9 @@
             color: var(--text-main);
             font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
             background:
-                radial-gradient(circle at 50% 16%, rgba(226, 185, 111, 0.12), transparent 22%),
+                radial-gradient(circle at 50% 26%, rgba(226, 185, 111, 0.10), transparent 23%),
                 radial-gradient(circle at 16% 18%, rgba(138, 203, 255, 0.10), transparent 24%),
-                radial-gradient(circle at 84% 10%, rgba(181, 151, 255, 0.12), transparent 24%),
+                radial-gradient(circle at 84% 10%, rgba(181, 151, 255, 0.13), transparent 24%),
                 linear-gradient(180deg, var(--bg-2), var(--bg-1));
         }
 
@@ -52,32 +47,36 @@
             background-image:
                 radial-gradient(circle at 9% 20%, rgba(255, 255, 255, 0.42) 0 1px, transparent 1.7px),
                 radial-gradient(circle at 25% 12%, rgba(255, 248, 234, 0.36) 0 0.9px, transparent 1.6px),
-                radial-gradient(circle at 38% 28%, rgba(196, 222, 255, 0.28) 0 0.85px, transparent 1.5px),
                 radial-gradient(circle at 58% 16%, rgba(255, 255, 255, 0.32) 0 0.95px, transparent 1.6px),
                 radial-gradient(circle at 74% 24%, rgba(196, 222, 255, 0.26) 0 0.85px, transparent 1.5px),
-                radial-gradient(circle at 88% 14%, rgba(255, 243, 218, 0.34) 0 0.95px, transparent 1.6px),
                 radial-gradient(circle at 12% 76%, rgba(255, 255, 255, 0.24) 0 0.8px, transparent 1.4px),
                 radial-gradient(circle at 36% 88%, rgba(196, 222, 255, 0.20) 0 0.7px, transparent 1.3px),
-                radial-gradient(circle at 62% 78%, rgba(255, 243, 218, 0.24) 0 0.82px, transparent 1.4px),
                 radial-gradient(circle at 84% 84%, rgba(255, 255, 255, 0.18) 0 0.72px, transparent 1.3px);
             opacity: 0.78;
         }
 
         .app {
-            width: min(1360px, calc(100vw - 28px));
+            width: min(1380px, calc(100vw - 28px));
             margin: 0 auto;
             padding: 28px 0 42px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero,
+        .board-shell,
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            background:
+                linear-gradient(180deg, rgba(255, 247, 227, 0.05), rgba(255, 247, 227, 0.02)),
+                var(--panel);
+            box-shadow: var(--shadow);
         }
 
         .hero {
             margin-bottom: 18px;
             padding: 22px 24px;
-            border: 1px solid var(--line);
-            border-radius: 28px;
-            background:
-                linear-gradient(180deg, rgba(255, 245, 222, 0.06), rgba(255, 245, 222, 0.02)),
-                rgba(14, 10, 23, 0.76);
-            box-shadow: var(--shadow);
         }
 
         .hero h1 {
@@ -87,30 +86,21 @@
         }
 
         .hero p {
-            max-width: 900px;
+            max-width: 960px;
             color: var(--text-soft);
             line-height: 1.8;
         }
 
         .workspace {
             display: grid;
-            grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+            grid-template-columns: minmax(620px, 1.05fr) minmax(340px, 0.8fr);
             gap: 18px;
             align-items: start;
         }
 
-        .board-shell,
-        .panel {
-            border: 1px solid var(--line);
-            border-radius: 28px;
-            background:
-                linear-gradient(180deg, rgba(255, 247, 227, 0.04), rgba(255, 247, 227, 0.02)),
-                var(--panel);
-            box-shadow: var(--shadow);
-        }
-
         .board-shell {
             padding: 20px;
+            overflow: hidden;
         }
 
         .board-head {
@@ -131,6 +121,7 @@
         .board-subtitle {
             color: var(--text-dim);
             font-size: 0.92rem;
+            margin-top: 6px;
         }
 
         .chip-row {
@@ -140,7 +131,8 @@
             gap: 8px;
         }
 
-        .chip {
+        .chip,
+        .legend span {
             padding: 6px 10px;
             border-radius: 999px;
             border: 1px solid rgba(237, 211, 161, 0.18);
@@ -150,158 +142,192 @@
             letter-spacing: 0.04em;
         }
 
-        .board {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 10px;
-        }
-
-        .palace {
-            min-height: 216px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            padding: 14px;
-            border-radius: 22px;
-            border: 1px solid rgba(237, 211, 161, 0.14);
-            background:
-                linear-gradient(180deg, rgba(255, 247, 227, 0.05), rgba(255, 247, 227, 0.01)),
-                rgba(8, 10, 18, 0.54);
+        .wheel {
             position: relative;
+            width: min(82vmin, 820px);
+            aspect-ratio: 1;
+            margin: 14px auto 8px;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 50% 50%, rgba(226, 185, 111, 0.10), transparent 16%),
+                radial-gradient(circle at 50% 50%, rgba(181, 151, 255, 0.13), transparent 38%),
+                radial-gradient(circle, rgba(255, 245, 226, 0.04) 0 18%, transparent 18.4%),
+                radial-gradient(circle, rgba(255, 240, 214, 0.04) 0 39%, transparent 39.4%),
+                radial-gradient(circle, rgba(255, 240, 214, 0.035) 0 58%, transparent 58.4%),
+                radial-gradient(circle, rgba(255, 240, 214, 0.03) 0 78%, transparent 78.4%),
+                rgba(6, 8, 17, 0.68);
+            box-shadow:
+                inset 0 0 0 1px rgba(255, 235, 198, 0.08),
+                0 0 50px rgba(217, 162, 62, 0.08),
+                0 0 110px rgba(118, 84, 188, 0.16);
             overflow: hidden;
         }
 
-        .palace::before {
+        .wheel::before {
             content: "";
             position: absolute;
             inset: 0;
-            background:
-                radial-gradient(circle at 18% 18%, rgba(226, 185, 111, 0.10), transparent 30%),
-                linear-gradient(135deg, rgba(138, 203, 255, 0.05), transparent 46%);
+            border-radius: 50%;
+            background: repeating-conic-gradient(
+                from -112.5deg,
+                rgba(255, 232, 194, 0.11) 0deg 0.7deg,
+                transparent 0.7deg 45deg
+            );
+            mask: radial-gradient(circle, transparent 0 14%, #000 14.5% 87%, transparent 87.5%);
+            -webkit-mask: radial-gradient(circle, transparent 0 14%, #000 14.5% 87%, transparent 87.5%);
             pointer-events: none;
         }
 
-        .palace--center {
+        .ring-surface,
+        .ring-items,
+        .palace-labels {
+            position: absolute;
+            inset: 0;
+        }
+
+        .ring-surface {
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .surface-god {
+            background: conic-gradient(from -112.5deg, rgba(181, 151, 255, 0.13), rgba(12, 16, 29, 0.72), rgba(181, 151, 255, 0.13));
+            mask: radial-gradient(circle, transparent 0 72%, #000 72.5% 88%, transparent 88.5%);
+            -webkit-mask: radial-gradient(circle, transparent 0 72%, #000 72.5% 88%, transparent 88.5%);
+        }
+
+        .surface-star {
+            background: conic-gradient(from -112.5deg, rgba(138, 203, 255, 0.13), rgba(12, 16, 29, 0.70), rgba(138, 203, 255, 0.13));
+            mask: radial-gradient(circle, transparent 0 54%, #000 54.5% 70%, transparent 70.5%);
+            -webkit-mask: radial-gradient(circle, transparent 0 54%, #000 54.5% 70%, transparent 70.5%);
+        }
+
+        .surface-door {
+            background: conic-gradient(from -112.5deg, rgba(95, 190, 121, 0.13), rgba(12, 16, 29, 0.70), rgba(95, 190, 121, 0.13));
+            mask: radial-gradient(circle, transparent 0 36%, #000 36.5% 52%, transparent 52.5%);
+            -webkit-mask: radial-gradient(circle, transparent 0 36%, #000 36.5% 52%, transparent 52.5%);
+        }
+
+        .surface-earth {
+            background: conic-gradient(from -112.5deg, rgba(226, 185, 111, 0.16), rgba(12, 16, 29, 0.70), rgba(226, 185, 111, 0.16));
+            mask: radial-gradient(circle, transparent 0 18%, #000 18.5% 34%, transparent 34.5%);
+            -webkit-mask: radial-gradient(circle, transparent 0 18%, #000 18.5% 34%, transparent 34.5%);
+        }
+
+        .ring-line {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
             background:
-                linear-gradient(180deg, rgba(255, 247, 227, 0.08), rgba(255, 247, 227, 0.03)),
-                rgba(28, 18, 16, 0.62);
-            border-color: rgba(237, 211, 161, 0.22);
+                radial-gradient(circle, transparent 0 17.7%, rgba(251, 238, 214, 0.52) 18%, transparent 18.3%),
+                radial-gradient(circle, transparent 0 34.2%, rgba(251, 238, 214, 0.38) 34.5%, transparent 34.8%),
+                radial-gradient(circle, transparent 0 36.2%, rgba(251, 238, 214, 0.52) 36.5%, transparent 36.8%),
+                radial-gradient(circle, transparent 0 52.2%, rgba(251, 238, 214, 0.38) 52.5%, transparent 52.8%),
+                radial-gradient(circle, transparent 0 54.2%, rgba(251, 238, 214, 0.52) 54.5%, transparent 54.8%),
+                radial-gradient(circle, transparent 0 70.2%, rgba(251, 238, 214, 0.38) 70.5%, transparent 70.8%),
+                radial-gradient(circle, transparent 0 72.2%, rgba(251, 238, 214, 0.52) 72.5%, transparent 72.8%),
+                radial-gradient(circle, transparent 0 88.2%, rgba(251, 238, 214, 0.45) 88.5%, transparent 88.8%);
+            filter: drop-shadow(0 0 8px rgba(247, 226, 186, 0.12));
+            pointer-events: none;
         }
 
-        .palace-head,
-        .palace-foot,
-        .layer {
-            position: relative;
-            z-index: 1;
-        }
-
-        .palace-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .palace-title {
+        .ring-item,
+        .palace-label {
+            position: absolute;
+            transform: translate(-50%, -50%);
             display: grid;
-            gap: 2px;
+            place-items: center;
+            text-align: center;
+            user-select: none;
         }
 
-        .palace-title strong {
-            font-size: 1rem;
+        .ring-item {
+            min-width: clamp(56px, 7.4vmin, 82px);
+            min-height: clamp(44px, 6vmin, 68px);
+            padding: 6px 8px;
+            border-radius: 18px;
+            border: 1px solid rgba(249, 230, 196, 0.18);
+            background:
+                linear-gradient(180deg, rgba(255, 246, 225, 0.10), rgba(255, 246, 225, 0.03)),
+                rgba(13, 10, 22, 0.76);
+            box-shadow:
+                0 10px 18px rgba(0, 0, 0, 0.20),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(6px);
         }
 
-        .palace-title span {
-            color: var(--text-dim);
-            font-size: 0.84rem;
+        .ring-item .main {
+            font-size: clamp(0.92rem, 1.65vmin, 1.18rem);
+            letter-spacing: 0.08em;
+            line-height: 1.1;
+            font-weight: 700;
         }
 
-        .palace-no {
-            width: 34px;
-            height: 34px;
+        .ring-item .sub {
+            margin-top: 2px;
+            font-size: clamp(0.54rem, 0.95vmin, 0.68rem);
+            color: rgba(249, 229, 197, 0.58);
+            line-height: 1.15;
+        }
+
+        .ring-item[data-layer="god"] { color: var(--god); border-color: rgba(181, 151, 255, 0.26); }
+        .ring-item[data-layer="star"] { color: var(--star); border-color: rgba(138, 203, 255, 0.26); }
+        .ring-item[data-layer="door"] { color: var(--door); border-color: rgba(95, 190, 121, 0.26); }
+        .ring-item[data-layer="earth"] { color: var(--earth); border-color: rgba(226, 185, 111, 0.28); }
+
+        .palace-label {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1px solid rgba(237, 211, 161, 0.22);
+            background: rgba(8, 10, 18, 0.76);
+            color: rgba(247, 232, 201, 0.82);
+            font-size: 0.8rem;
+            line-height: 1.25;
+        }
+
+        .center-core {
+            position: absolute;
+            inset: 38.5%;
             border-radius: 50%;
             display: grid;
             place-items: center;
-            font-weight: 700;
-            color: #120d10;
-            background: linear-gradient(180deg, #f7e8c8, #dfb66a);
-            box-shadow: 0 0 18px rgba(226, 185, 111, 0.22);
+            text-align: center;
+            padding: 14px;
+            border: 1px solid rgba(237, 211, 161, 0.30);
+            background:
+                radial-gradient(circle at 50% 34%, rgba(226, 185, 111, 0.18), transparent 48%),
+                rgba(10, 8, 18, 0.90);
+            box-shadow:
+                inset 0 0 18px rgba(255, 240, 214, 0.05),
+                0 0 36px rgba(226, 185, 111, 0.12);
         }
 
-        .layer-stack {
-            display: grid;
-            gap: 8px;
-            flex: 1;
+        .center-core strong {
+            display: block;
+            font-size: clamp(1rem, 2vmin, 1.38rem);
+            margin-bottom: 4px;
+            color: #f7e8c8;
         }
 
-        .layer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            padding: 8px 10px;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            background: rgba(255, 255, 255, 0.03);
+        .center-core span {
+            display: block;
+            color: var(--text-soft);
+            font-size: clamp(0.68rem, 1.2vmin, 0.86rem);
+            line-height: 1.45;
         }
 
-        .layer-label {
-            color: var(--text-dim);
-            font-size: 0.8rem;
-            letter-spacing: 0.06em;
-        }
-
-        .layer-value {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            text-align: right;
-        }
-
-        .layer-extra {
-            padding: 2px 7px;
-            border-radius: 999px;
-            font-size: 0.75rem;
-            color: rgba(19, 16, 22, 0.92);
-            background: rgba(247, 232, 201, 0.9);
-        }
-
-        .layer--god { border-color: rgba(181, 151, 255, 0.24); }
-        .layer--star { border-color: rgba(138, 203, 255, 0.24); }
-        .layer--door { border-color: rgba(95, 190, 121, 0.24); }
-        .layer--earth { border-color: rgba(226, 185, 111, 0.24); }
-
-        .layer--god .layer-value { color: #d7c6ff; }
-        .layer--star .layer-value { color: #b7ddff; }
-        .layer--door .layer-value { color: #9be0af; }
-        .layer--earth .layer-value { color: #f0d39b; }
-
-        .palace-foot {
+        .legend {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 8px;
+            margin-top: 16px;
         }
 
-        .badge {
-            padding: 4px 8px;
-            border-radius: 999px;
-            border: 1px solid rgba(237, 211, 161, 0.20);
-            background: rgba(255, 247, 227, 0.06);
-            color: var(--text-soft);
-            font-size: 0.78rem;
-        }
-
-        .badge--chief {
-            color: #20150b;
-            background: linear-gradient(180deg, #f7e8c8, #dfb66a);
-            border-color: rgba(255, 244, 221, 0.48);
-        }
-
-        .badge--warn {
-            background: rgba(224, 129, 104, 0.16);
-            border-color: rgba(224, 129, 104, 0.28);
-        }
+        .legend .god { color: var(--god); border-color: rgba(181, 151, 255, 0.24); }
+        .legend .star { color: var(--star); border-color: rgba(138, 203, 255, 0.24); }
+        .legend .door { color: var(--door); border-color: rgba(95, 190, 121, 0.24); }
+        .legend .earth { color: var(--earth); border-color: rgba(226, 185, 111, 0.24); }
 
         .side {
             display: grid;
@@ -337,8 +363,7 @@
         }
 
         .field select,
-        .field input,
-        textarea {
+        .field input {
             width: 100%;
             padding: 10px 12px;
             border: 1px solid rgba(237, 211, 161, 0.14);
@@ -349,8 +374,7 @@
         }
 
         .field select:focus,
-        .field input:focus,
-        textarea:focus {
+        .field input:focus {
             outline: none;
             border-color: rgba(237, 211, 161, 0.32);
             box-shadow: 0 0 0 3px rgba(226, 185, 111, 0.08);
@@ -382,16 +406,21 @@
             box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
         }
 
-        .summary-grid {
+        .summary-grid,
+        .trace-list {
             display: grid;
             gap: 10px;
         }
 
-        .summary-item {
+        .summary-item,
+        .trace-list li {
             padding: 10px 12px;
             border-radius: 14px;
             border: 1px solid rgba(237, 211, 161, 0.10);
             background: rgba(255, 255, 255, 0.03);
+            color: var(--text-soft);
+            line-height: 1.72;
+            font-size: 0.92rem;
         }
 
         .summary-item strong {
@@ -400,60 +429,24 @@
             color: #f5e8cd;
         }
 
-        .summary-item span {
-            color: var(--text-soft);
-            line-height: 1.72;
-            font-size: 0.92rem;
-        }
-
-        .rule-list,
-        .trace-list {
-            display: grid;
-            gap: 10px;
-            color: var(--text-soft);
-            line-height: 1.78;
-            font-size: 0.93rem;
-        }
-
         .trace-list {
             list-style: none;
         }
 
-        .trace-list li {
-            padding: 10px 12px;
-            border-radius: 14px;
-            border: 1px solid rgba(237, 211, 161, 0.10);
-            background: rgba(255, 255, 255, 0.03);
-        }
-
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .legend span {
-            padding: 6px 10px;
-            border-radius: 999px;
-            font-size: 0.82rem;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .legend .god { color: #d7c6ff; border-color: rgba(181, 151, 255, 0.24); }
-        .legend .star { color: #b7ddff; border-color: rgba(138, 203, 255, 0.24); }
-        .legend .door { color: #9be0af; border-color: rgba(95, 190, 121, 0.24); }
-        .legend .earth { color: #f0d39b; border-color: rgba(226, 185, 111, 0.24); }
-
         .footer-note {
-            margin-top: 18px;
+            margin-top: 14px;
             color: var(--text-dim);
             line-height: 1.8;
             font-size: 0.9rem;
         }
 
-        @media (max-width: 1120px) {
+        @media (max-width: 1180px) {
             .workspace {
                 grid-template-columns: 1fr;
+            }
+
+            .wheel {
+                width: min(88vmin, 780px);
             }
         }
 
@@ -482,9 +475,16 @@
                 grid-template-columns: 1fr;
             }
 
-            .palace {
-                min-height: 196px;
-                padding: 12px;
+            .ring-item {
+                min-width: 48px;
+                min-height: 38px;
+                padding: 5px 6px;
+            }
+
+            .palace-label {
+                width: 40px;
+                height: 40px;
+                font-size: 0.72rem;
             }
         }
     </style>
@@ -492,10 +492,10 @@
 <body>
     <main class="app">
         <section class="hero">
-            <h1>奇门遁甲四盘框架</h1>
+            <h1>奇门遁甲四盘同心圆</h1>
             <p>
-                这个版本先把九宫与四盘结构搭出来：地盘三奇六仪、天盘九星与天干、人盘八门、神盘八神分层显示，
-                同时把阴阳遁、局数、旬首、值符、值使等参数拆成独立规则函数，便于后续继续接入节气、拆补、置闰和时家自动排盘。
+                以时家转盘奇门为骨架，把神盘、天盘、人盘、地盘放在四个大小不同的同心圆中展示。
+                时间、经纬度和时区作为起盘输入；流派、局数、旬首、值符值使等规则项保留为枚举选择，方便逐步接入更完整的专业算法。
             </p>
         </section>
 
@@ -503,22 +503,85 @@
             <section class="board-shell">
                 <div class="board-head">
                     <div>
-                        <h2>九宫四盘</h2>
-                        <div class="board-subtitle" id="boardSubtitle">以局数定地盘，以值符定天盘，以值使定人盘，以阴阳遁定顺逆。</div>
+                        <h2>四盘转盘</h2>
+                        <div class="board-subtitle" id="boardSubtitle">外圈神盘，次圈天盘，再内人盘，内圈地盘。</div>
                     </div>
                     <div class="chip-row" id="boardChips"></div>
                 </div>
-                <div class="board" id="board"></div>
+
+                <div class="wheel" id="wheel">
+                    <div class="ring-surface surface-god"></div>
+                    <div class="ring-surface surface-star"></div>
+                    <div class="ring-surface surface-door"></div>
+                    <div class="ring-surface surface-earth"></div>
+                    <div class="ring-line"></div>
+                    <div class="palace-labels" id="palaceLabels"></div>
+                    <div class="ring-items" id="ringItems"></div>
+                    <div class="center-core" id="centerCore"></div>
+                </div>
+
+                <div class="legend">
+                    <span class="god">神盘：八神</span>
+                    <span class="star">天盘：九星 / 天干</span>
+                    <span class="door">人盘：八门</span>
+                    <span class="earth">地盘：三奇六仪</span>
+                </div>
                 <div class="footer-note" id="boardNote"></div>
             </section>
 
             <aside class="side">
                 <section class="panel">
-                    <h2>基础参数</h2>
+                    <h2>时间地点</h2>
                     <div class="form-grid">
                         <div class="field field--span">
-                            <label for="presetSelect">示例局</label>
-                            <select id="presetSelect"></select>
+                            <label for="datetimeInput">起盘时间</label>
+                            <input id="datetimeInput" type="datetime-local" step="1">
+                        </div>
+                        <div class="field">
+                            <label for="latitudeInput">纬度</label>
+                            <input id="latitudeInput" type="number" step="0.000001" value="39.904200">
+                        </div>
+                        <div class="field">
+                            <label for="longitudeInput">经度</label>
+                            <input id="longitudeInput" type="number" step="0.000001" value="116.407400">
+                        </div>
+                        <div class="field">
+                            <label for="timezoneSelect">时区</label>
+                            <select id="timezoneSelect"></select>
+                        </div>
+                        <div class="field">
+                            <label for="solarTimeSelect">时间校正</label>
+                            <select id="solarTimeSelect">
+                                <option value="standard">标准时</option>
+                                <option value="solar">真太阳时近似</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="button-row">
+                        <button type="button" id="prevHourButton">前一时辰</button>
+                        <button type="button" id="nowButton">取当前时间</button>
+                        <button type="button" id="nextHourButton">后一时辰</button>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <h2>规则参数</h2>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="methodSelect">流派</label>
+                            <select id="methodSelect">
+                                <option value="时家转盘奇门">时家转盘奇门</option>
+                                <option value="飞盘奇门">飞盘奇门占位</option>
+                                <option value="阴盘奇门">阴盘奇门占位</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="juMethodSelect">取局法</label>
+                            <select id="juMethodSelect">
+                                <option value="拆补法">拆补法</option>
+                                <option value="置闰法">置闰法</option>
+                                <option value="茅山法">茅山法</option>
+                            </select>
                         </div>
                         <div class="field">
                             <label for="dunSelect">遁法</label>
@@ -531,6 +594,13 @@
                         <div class="field">
                             <label for="xunshouSelect">旬首</label>
                             <select id="xunshouSelect"></select>
+                        </div>
+                        <div class="field">
+                            <label for="godRuleSelect">八神规则</label>
+                            <select id="godRuleSelect">
+                                <option value="阳顺阴逆">阳顺阴逆</option>
+                                <option value="固定顺布">固定顺布</option>
+                            </select>
                         </div>
                         <div class="field">
                             <label for="chiefStarSelect">值符星</label>
@@ -548,41 +618,16 @@
                             <label for="chiefDoorPalaceSelect">值使宫</label>
                             <select id="chiefDoorPalaceSelect"></select>
                         </div>
-                        <div class="field field--span">
-                            <label for="noteInput">备注</label>
-                            <input id="noteInput" type="text" placeholder="例如：后续可接节气与时干自动求值符值使">
-                        </div>
                     </div>
                     <div class="button-row">
-                        <button type="button" id="applyButton">应用当前参数</button>
-                        <button type="button" id="nextPresetButton">下一个示例</button>
-                        <button type="button" id="resetButton">回到框架初始盘</button>
+                        <button type="button" id="applyButton">应用参数</button>
+                        <button type="button" id="autoButton">按时间粗略推导</button>
                     </div>
                 </section>
 
                 <section class="panel">
                     <h2>排盘摘要</h2>
                     <div class="summary-grid" id="summary"></div>
-                </section>
-
-                <section class="panel">
-                    <h2>规则边界</h2>
-                    <div class="rule-list">
-                        <div>1. 当前版本先实现“四盘骨架”和“顺逆飞布的可视化联动”，让后续算法能有清晰挂载点。</div>
-                        <div>2. 地盘以局数起宫排三奇六仪；天盘以旬首所领之仪与值符宫联动；人盘以值使门落宫飞布；神盘随阴阳遁顺逆而转。</div>
-                        <div>3. 中五宫暂作为框架信息位，未做寄宫、寄禽与各家流派细分处理。</div>
-                        <div>4. 节气定阴阳遁、拆补置闰、旬空、时干求值符值使等精确规则，后面可以继续补到 `derive*` 系列函数里。</div>
-                    </div>
-                </section>
-
-                <section class="panel">
-                    <h2>图层说明</h2>
-                    <div class="legend">
-                        <span class="god">神盘：八神</span>
-                        <span class="star">天盘：九星 / 天干</span>
-                        <span class="door">人盘：八门</span>
-                        <span class="earth">地盘：三奇六仪</span>
-                    </div>
                 </section>
             </aside>
         </section>
@@ -594,7 +639,6 @@
     </main>
 
     <script>
-        const PALACE_GRID = [4, 9, 2, 3, 5, 7, 8, 1, 6];
         const OUTER_RING = [1, 8, 3, 4, 9, 2, 7, 6];
         const EARTH_CYCLE = [1, 8, 3, 4, 9, 2, 7, 6, 5];
         const DUN_OPTIONS = ["阳遁", "阴遁"];
@@ -602,6 +646,8 @@
         const STAR_SEQUENCE = ["天蓬", "天任", "天冲", "天辅", "天英", "天芮", "天柱", "天心"];
         const DOOR_SEQUENCE = ["休门", "生门", "伤门", "杜门", "景门", "死门", "惊门", "开门"];
         const GOD_SEQUENCE = ["值符", "螣蛇", "太阴", "六合", "白虎", "玄武", "九地", "九天"];
+        const STEMS = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
+        const BRANCHES = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
 
         const XUN_SHOU_LIST = [
             { label: "甲子戊", stem: "戊" },
@@ -628,77 +674,39 @@
             9: { name: "离", title: "离九宫", direction: "南", palaceText: "火地", element: "火" }
         };
 
-        const PRESETS = [
-            {
-                name: "框架初始盘",
-                dun: "阳遁",
-                ju: 1,
-                xunshou: "甲子戊",
-                chiefStar: "天蓬",
-                chiefDoor: "休门",
-                chiefStarPalace: 1,
-                chiefDoorPalace: 1,
-                note: "从最基础的阳遁一局起盘，先确认四盘联动与九宫布局。"
-            },
-            {
-                name: "阳遁四局",
-                dun: "阳遁",
-                ju: 4,
-                xunshou: "甲申庚",
-                chiefStar: "天辅",
-                chiefDoor: "杜门",
-                chiefStarPalace: 4,
-                chiefDoorPalace: 4,
-                note: "演示值符落巽四宫时，天盘、神盘如何同步旋转。"
-            },
-            {
-                name: "阳遁七局",
-                dun: "阳遁",
-                ju: 7,
-                xunshou: "甲辰壬",
-                chiefStar: "天柱",
-                chiefDoor: "惊门",
-                chiefStarPalace: 7,
-                chiefDoorPalace: 7,
-                note: "适合观察地盘起宫位置改变后，天盘和人盘的分离关系。"
-            },
-            {
-                name: "阴遁六局",
-                dun: "阴遁",
-                ju: 6,
-                xunshou: "甲寅癸",
-                chiefStar: "天心",
-                chiefDoor: "开门",
-                chiefStarPalace: 6,
-                chiefDoorPalace: 6,
-                note: "演示阴遁逆飞时，神盘与八门的逆序分布。"
-            }
-        ];
-
         const state = {
-            presetIndex: 0,
-            config: { ...PRESETS[0] }
+            config: null
         };
 
         const dom = {
-            board: document.getElementById("board"),
+            ringItems: document.getElementById("ringItems"),
+            palaceLabels: document.getElementById("palaceLabels"),
+            centerCore: document.getElementById("centerCore"),
             boardSubtitle: document.getElementById("boardSubtitle"),
             boardChips: document.getElementById("boardChips"),
             boardNote: document.getElementById("boardNote"),
             summary: document.getElementById("summary"),
             trace: document.getElementById("trace"),
-            presetSelect: document.getElementById("presetSelect"),
+            datetimeInput: document.getElementById("datetimeInput"),
+            latitudeInput: document.getElementById("latitudeInput"),
+            longitudeInput: document.getElementById("longitudeInput"),
+            timezoneSelect: document.getElementById("timezoneSelect"),
+            solarTimeSelect: document.getElementById("solarTimeSelect"),
+            methodSelect: document.getElementById("methodSelect"),
+            juMethodSelect: document.getElementById("juMethodSelect"),
             dunSelect: document.getElementById("dunSelect"),
             juSelect: document.getElementById("juSelect"),
             xunshouSelect: document.getElementById("xunshouSelect"),
+            godRuleSelect: document.getElementById("godRuleSelect"),
             chiefStarSelect: document.getElementById("chiefStarSelect"),
             chiefDoorSelect: document.getElementById("chiefDoorSelect"),
             chiefStarPalaceSelect: document.getElementById("chiefStarPalaceSelect"),
             chiefDoorPalaceSelect: document.getElementById("chiefDoorPalaceSelect"),
-            noteInput: document.getElementById("noteInput"),
             applyButton: document.getElementById("applyButton"),
-            nextPresetButton: document.getElementById("nextPresetButton"),
-            resetButton: document.getElementById("resetButton")
+            autoButton: document.getElementById("autoButton"),
+            prevHourButton: document.getElementById("prevHourButton"),
+            nowButton: document.getElementById("nowButton"),
+            nextHourButton: document.getElementById("nextHourButton")
         };
 
         function mod(value, base) {
@@ -721,6 +729,122 @@
             select.innerHTML = options
                 .map((value) => `<option value="${value}">${getLabel(value)}</option>`)
                 .join("");
+        }
+
+        function pad(value) {
+            return String(value).padStart(2, "0");
+        }
+
+        function toDatetimeLocalValue(date) {
+            return [
+                date.getFullYear(),
+                pad(date.getMonth() + 1),
+                pad(date.getDate())
+            ].join("-") + `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+        }
+
+        function parseDatetimeLocal(value) {
+            if (!value) return new Date();
+            const [datePart, timePart = "00:00:00"] = value.split("T");
+            const [year, month, day] = datePart.split("-").map(Number);
+            const [hour = 0, minute = 0, second = 0] = timePart.split(":").map(Number);
+            return new Date(year, month - 1, day, hour, minute, second || 0);
+        }
+
+        function getDisplayDate() {
+            const date = parseDatetimeLocal(dom.datetimeInput.value);
+            const timezone = Number(dom.timezoneSelect.value);
+
+            if (dom.solarTimeSelect.value === "solar") {
+                const longitude = Number(dom.longitudeInput.value) || timezone * 15;
+                const longitudeDeltaMinutes = (longitude - timezone * 15) * 4;
+                return new Date(date.getTime() + longitudeDeltaMinutes * 60 * 1000);
+            }
+
+            return date;
+        }
+
+        function getHourBranchIndex(date) {
+            return mod(Math.floor((date.getHours() + 1) / 2), 12);
+        }
+
+        function buildSexagenaryCycle() {
+            return Array.from({ length: 60 }, (_, index) => ({
+                stem: STEMS[index % 10],
+                branch: BRANCHES[index % 12],
+                text: `${STEMS[index % 10]}${BRANCHES[index % 12]}`
+            }));
+        }
+
+        const SEXAGENARY = buildSexagenaryCycle();
+
+        function getDayGanzhi(date) {
+            const localMidnight = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+            const baseJiaZi = Date.UTC(1984, 1, 2);
+            const diffDays = Math.floor((localMidnight - baseJiaZi) / 86400000);
+            return SEXAGENARY[mod(diffDays, 60)];
+        }
+
+        function getHourGanzhi(date, dayStem) {
+            const branchIndex = getHourBranchIndex(date);
+            const dayStemIndex = STEMS.indexOf(dayStem);
+            const stemIndex = mod((dayStemIndex % 5) * 2 + branchIndex, 10);
+            return {
+                stem: STEMS[stemIndex],
+                branch: BRANCHES[branchIndex],
+                text: `${STEMS[stemIndex]}${BRANCHES[branchIndex]}`,
+                branchIndex
+            };
+        }
+
+        function getXunshouFromGanzhi(ganzhiText) {
+            const index = SEXAGENARY.findIndex((item) => item.text === ganzhiText);
+            const start = Math.floor(Math.max(index, 0) / 10) * 10;
+            const labelMap = {
+                0: "甲子戊",
+                10: "甲戌己",
+                20: "甲申庚",
+                30: "甲午辛",
+                40: "甲辰壬",
+                50: "甲寅癸"
+            };
+            return labelMap[start] || "甲子戊";
+        }
+
+        function getSolarTermHint(date) {
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const terms = [
+                [1, 5, "小寒"], [1, 20, "大寒"], [2, 4, "立春"], [2, 19, "雨水"],
+                [3, 6, "惊蛰"], [3, 21, "春分"], [4, 5, "清明"], [4, 20, "谷雨"],
+                [5, 6, "立夏"], [5, 21, "小满"], [6, 6, "芒种"], [6, 21, "夏至"],
+                [7, 7, "小暑"], [7, 23, "大暑"], [8, 8, "立秋"], [8, 23, "处暑"],
+                [9, 8, "白露"], [9, 23, "秋分"], [10, 8, "寒露"], [10, 23, "霜降"],
+                [11, 7, "立冬"], [11, 22, "小雪"], [12, 7, "大雪"], [12, 22, "冬至"]
+            ];
+            let current = "冬至";
+            terms.forEach(([termMonth, termDay, name]) => {
+                if (month > termMonth || (month === termMonth && day >= termDay)) {
+                    current = name;
+                }
+            });
+            return current;
+        }
+
+        function getTimeInfo() {
+            const date = getDisplayDate();
+            const day = getDayGanzhi(date);
+            const hour = getHourGanzhi(date, day.stem);
+            return {
+                date,
+                dayGanzhi: day.text,
+                hourGanzhi: hour.text,
+                hourStem: hour.stem,
+                hourBranch: hour.branch,
+                hourBranchIndex: hour.branchIndex,
+                xunshou: getXunshouFromGanzhi(hour.text),
+                solarTerm: getSolarTermHint(date)
+            };
         }
 
         function rotateArray(list, startValue) {
@@ -793,67 +917,133 @@
         }
 
         function deriveGodPlate(config) {
+            const direction = config.godRule === "固定顺布" ? 1 : directionFromDun(config.dun);
             return {
                 ...buildSequenceMap(
                     GOD_SEQUENCE,
                     "值符",
                     config.chiefStarPalace,
-                    directionFromDun(config.dun)
+                    direction
                 ),
                 5: "中宫不布"
+            };
+        }
+
+        function getBaseStarDoorByPalace(palace) {
+            const index = OUTER_RING.indexOf(Number(palace));
+            return {
+                star: STAR_SEQUENCE[index >= 0 ? index : 0],
+                door: DOOR_SEQUENCE[index >= 0 ? index : 0]
+            };
+        }
+
+        function findPalaceByValue(plate, value) {
+            const match = Object.entries(plate).find(([, item]) => item === value);
+            return match ? Number(match[0]) : 1;
+        }
+
+        function readConfigFromForm() {
+            return {
+                method: dom.methodSelect.value,
+                juMethod: dom.juMethodSelect.value,
+                dun: dom.dunSelect.value,
+                ju: Number(dom.juSelect.value),
+                xunshou: dom.xunshouSelect.value,
+                godRule: dom.godRuleSelect.value,
+                chiefStar: dom.chiefStarSelect.value,
+                chiefDoor: dom.chiefDoorSelect.value,
+                chiefStarPalace: Number(dom.chiefStarPalaceSelect.value),
+                chiefDoorPalace: Number(dom.chiefDoorPalaceSelect.value),
+                latitude: Number(dom.latitudeInput.value),
+                longitude: Number(dom.longitudeInput.value),
+                timezone: Number(dom.timezoneSelect.value),
+                solarTimeMode: dom.solarTimeSelect.value,
+                timeInfo: getTimeInfo()
+            };
+        }
+
+        function writeConfigToForm(config) {
+            dom.methodSelect.value = config.method || "时家转盘奇门";
+            dom.juMethodSelect.value = config.juMethod || "拆补法";
+            dom.dunSelect.value = config.dun;
+            dom.juSelect.value = String(config.ju);
+            dom.xunshouSelect.value = config.xunshou;
+            dom.godRuleSelect.value = config.godRule || "阳顺阴逆";
+            dom.chiefStarSelect.value = config.chiefStar;
+            dom.chiefDoorSelect.value = config.chiefDoor;
+            dom.chiefStarPalaceSelect.value = String(config.chiefStarPalace);
+            dom.chiefDoorPalaceSelect.value = String(config.chiefDoorPalace);
+        }
+
+        function buildAutoConfig() {
+            const timeInfo = getTimeInfo();
+            const month = timeInfo.date.getMonth() + 1;
+            const dun = (month > 6 && month < 12) ? "阴遁" : "阳遁";
+            const direction = directionFromDun(dun);
+            const ju = mod(month + Math.floor(timeInfo.hourBranchIndex / 2), 9) + 1;
+            const xunshou = timeInfo.xunshou;
+            const chiefStem = XUN_SHOU_MAP[xunshou] || "戊";
+            const earth = deriveEarthPlate({ dun, ju });
+            const xunPalaceRaw = findPalaceByValue(earth, chiefStem);
+            const xunPalace = xunPalaceRaw === 5 ? 2 : xunPalaceRaw;
+            const hourStemPalaceRaw = findPalaceByValue(earth, timeInfo.hourStem);
+            const hourStemPalace = hourStemPalaceRaw === 5 ? xunPalace : hourStemPalaceRaw;
+            const base = getBaseStarDoorByPalace(xunPalace);
+            const palaceOrder = getDirectionalRing(xunPalace, direction);
+            const xunStartIndex = BRANCHES.indexOf(SEXAGENARY[Math.floor(SEXAGENARY.findIndex((item) => item.text === timeInfo.hourGanzhi) / 10) * 10]?.branch || "子");
+            const delta = mod(timeInfo.hourBranchIndex - xunStartIndex, 12);
+
+            return {
+                method: dom.methodSelect.value,
+                juMethod: dom.juMethodSelect.value,
+                dun,
+                ju,
+                xunshou,
+                godRule: dom.godRuleSelect.value,
+                chiefStar: base.star,
+                chiefDoor: base.door,
+                chiefStarPalace: hourStemPalace,
+                chiefDoorPalace: palaceOrder[delta % palaceOrder.length],
+                latitude: Number(dom.latitudeInput.value),
+                longitude: Number(dom.longitudeInput.value),
+                timezone: Number(dom.timezoneSelect.value),
+                solarTimeMode: dom.solarTimeSelect.value,
+                timeInfo
             };
         }
 
         function buildTrace(config) {
             const directionText = config.dun === "阳遁" ? "顺布" : "逆布";
             const chiefStem = XUN_SHOU_MAP[config.xunshou] || "戊";
+            const timeInfo = config.timeInfo;
 
             return [
+                `时间：${toDatetimeLocalValue(timeInfo.date).replace("T", " ")}，约为 ${timeInfo.solarTerm} 节气段，日干支 ${timeInfo.dayGanzhi}，时干支 ${timeInfo.hourGanzhi}。`,
+                `地点：纬度 ${config.latitude.toFixed(4)}，经度 ${config.longitude.toFixed(4)}，时区 UTC${config.timezone >= 0 ? "+" : ""}${config.timezone}，时间模式为${config.solarTimeMode === "solar" ? "真太阳时近似" : "标准时"}。`,
                 `地盘：以 ${config.dun}${config.ju}局 为起点，${EARTH_STEMS[0]} 从 ${getPalaceLabel(config.ju)} 起，按 ${directionText} 排出三奇六仪。`,
                 `天盘：先由旬首 ${config.xunshou} 取所领之仪 ${chiefStem}，再以值符星 ${config.chiefStar} 落 ${getPalaceLabel(config.chiefStarPalace)} 作为旋转起点。`,
                 `人盘：值使门 ${config.chiefDoor} 落 ${getPalaceLabel(config.chiefDoorPalace)}，其余八门依 ${config.dun} 的顺逆方向飞布。`,
-                `神盘：以值符宫为神盘起点，八神按 ${config.dun === "阳遁" ? "阳顺" : "阴逆"} 排列，便于后续接入值符、值使自动求取。`,
-                `边界：当前中心宫只保留寄宫提示，尚未细化各家寄禽寄门规则；节气、时干、旬空和拆补置闰也尚未自动参与计算。`
+                `神盘：以值符宫为神盘起点，当前八神规则为「${config.godRule}」。`,
+                `边界：自动推导为前端粗略模型；精确拆补、置闰、交节、旬空和中五寄宫可继续替换为专业历法算法。`
             ];
         }
 
         function buildSummary(config) {
+            const timeInfo = config.timeInfo;
             return [
                 {
-                    title: "排盘骨架",
-                    text: `${config.dun}${config.ju}局，值符 ${config.chiefStar} 在 ${getPalaceLabel(config.chiefStarPalace)}，值使 ${config.chiefDoor} 在 ${getPalaceLabel(config.chiefDoorPalace)}。`
+                    title: "起盘输入",
+                    text: `${toDatetimeLocalValue(timeInfo.date).replace("T", " ")}，${timeInfo.solarTerm}，${timeInfo.dayGanzhi}日 ${timeInfo.hourGanzhi}时。`
                 },
                 {
-                    title: "旬首挂点",
-                    text: `${config.xunshou} 用来确定值符所领之仪，当前框架以它作为天盘三奇六仪的起始标记。`
+                    title: "四盘骨架",
+                    text: `${config.method} / ${config.juMethod}，${config.dun}${config.ju}局，旬首 ${config.xunshou}，值符 ${config.chiefStar} 在 ${getPalaceLabel(config.chiefStarPalace)}，值使 ${config.chiefDoor} 在 ${getPalaceLabel(config.chiefDoorPalace)}。`
                 },
                 {
-                    title: "可扩展点",
-                    text: "后续只要把节气换算、时干推符使、寄宫规则补进 deriveEarthPlate / deriveHeavenPlate / deriveDoorPlate / deriveGodPlate 即可。"
+                    title: "输入状态",
+                    text: `经纬度 ${config.latitude.toFixed(4)}, ${config.longitude.toFixed(4)}，UTC${config.timezone >= 0 ? "+" : ""}${config.timezone}，${config.solarTimeMode === "solar" ? "已做经度差真太阳时近似" : "使用标准时"}。`
                 }
             ];
-        }
-
-        function buildBadges(config, palace) {
-            const badges = [];
-
-            if (Number(config.ju) === palace) {
-                badges.push({ text: "局首", kind: "" });
-            }
-
-            if (Number(config.chiefStarPalace) === palace) {
-                badges.push({ text: "值符", kind: "badge--chief" });
-            }
-
-            if (Number(config.chiefDoorPalace) === palace) {
-                badges.push({ text: "值使", kind: "badge--chief" });
-            }
-
-            if (palace === 5) {
-                badges.push({ text: "中宫", kind: "badge--warn" });
-            }
-
-            return badges;
         }
 
         function escapeHtml(value) {
@@ -864,53 +1054,83 @@
                 .replaceAll('"', "&quot;");
         }
 
-        function renderBoard(frame) {
-            dom.board.innerHTML = PALACE_GRID.map((palace) => {
-                const meta = getPalaceMeta(palace);
-                const badges = buildBadges(frame.config, palace);
-                const isCenter = palace === 5;
-                const heavenStar = frame.heaven.stars[palace];
-                const heavenStem = frame.heaven.stems[palace];
-                const god = frame.gods[palace];
-                const door = frame.doors[palace];
-                const earth = frame.earth[palace];
+        function getPoint(angle, radius) {
+            const rad = angle * Math.PI / 180;
+            return {
+                x: 50 + Math.cos(rad) * radius,
+                y: 50 + Math.sin(rad) * radius
+            };
+        }
 
+        function createRingNode({ layer, main, sub, palace, radius }) {
+            const index = OUTER_RING.indexOf(Number(palace));
+            const angle = -90 + index * 45;
+            const point = getPoint(angle, radius);
+            return `
+                <div class="ring-item" data-layer="${layer}" style="left:${point.x}%;top:${point.y}%">
+                    <div class="main">${escapeHtml(main)}</div>
+                    <div class="sub">${escapeHtml(sub)}</div>
+                </div>
+            `;
+        }
+
+        function renderPalaceLabels() {
+            dom.palaceLabels.innerHTML = OUTER_RING.map((palace, index) => {
+                const meta = getPalaceMeta(palace);
+                const point = getPoint(-90 + index * 45, 46);
                 return `
-                    <article class="palace ${isCenter ? "palace--center" : ""}">
-                        <div class="palace-head">
-                            <div class="palace-title">
-                                <strong>${meta.title}</strong>
-                                <span>${meta.direction} · ${meta.palaceText}</span>
-                            </div>
-                            <div class="palace-no">${palace}</div>
-                        </div>
-                        <div class="layer-stack">
-                            <div class="layer layer--god">
-                                <div class="layer-label">神盘</div>
-                                <div class="layer-value">${escapeHtml(god)}</div>
-                            </div>
-                            <div class="layer layer--star">
-                                <div class="layer-label">天盘</div>
-                                <div class="layer-value">
-                                    <span>${escapeHtml(heavenStar)}</span>
-                                    <span class="layer-extra">${escapeHtml(heavenStem)}</span>
-                                </div>
-                            </div>
-                            <div class="layer layer--door">
-                                <div class="layer-label">人盘</div>
-                                <div class="layer-value">${escapeHtml(door)}</div>
-                            </div>
-                            <div class="layer layer--earth">
-                                <div class="layer-label">地盘</div>
-                                <div class="layer-value">${escapeHtml(earth)}</div>
-                            </div>
-                        </div>
-                        <div class="palace-foot">
-                            ${badges.map((item) => `<span class="badge ${item.kind}">${item.text}</span>`).join("")}
-                        </div>
-                    </article>
+                    <div class="palace-label" style="left:${point.x}%;top:${point.y}%">
+                        <strong>${palace}</strong>
+                        <span>${meta.name}${meta.direction}</span>
+                    </div>
                 `;
             }).join("");
+        }
+
+        function renderWheel(frame) {
+            const nodes = [];
+
+            OUTER_RING.forEach((palace) => {
+                nodes.push(createRingNode({
+                    layer: "god",
+                    main: frame.gods[palace],
+                    sub: getPalaceLabel(palace),
+                    palace,
+                    radius: 40
+                }));
+                nodes.push(createRingNode({
+                    layer: "star",
+                    main: frame.heaven.stars[palace],
+                    sub: `${frame.heaven.stems[palace]} · ${getPalaceLabel(palace)}`,
+                    palace,
+                    radius: 31
+                }));
+                nodes.push(createRingNode({
+                    layer: "door",
+                    main: frame.doors[palace],
+                    sub: getPalaceLabel(palace),
+                    palace,
+                    radius: 22
+                }));
+                nodes.push(createRingNode({
+                    layer: "earth",
+                    main: frame.earth[palace],
+                    sub: getPalaceLabel(palace),
+                    palace,
+                    radius: 13
+                }));
+            });
+
+            dom.ringItems.innerHTML = nodes.join("");
+            dom.centerCore.innerHTML = `
+                <div>
+                    <strong>中五宫</strong>
+                    <span>神：${escapeHtml(frame.gods[5])}</span>
+                    <span>天：${escapeHtml(frame.heaven.stars[5])} / ${escapeHtml(frame.heaven.stems[5])}</span>
+                    <span>人：${escapeHtml(frame.doors[5])}</span>
+                    <span>地：${escapeHtml(frame.earth[5])}</span>
+                </div>
+            `;
         }
 
         function renderSummary(items) {
@@ -929,12 +1149,13 @@
         function renderBoardHeader(config) {
             dom.boardSubtitle.textContent = `当前为 ${config.dun}${config.ju}局，值符 ${config.chiefStar} 落 ${getPalaceLabel(config.chiefStarPalace)}，值使 ${config.chiefDoor} 落 ${getPalaceLabel(config.chiefDoorPalace)}。`;
             dom.boardChips.innerHTML = [
+                config.method,
+                config.juMethod,
                 `旬首 ${config.xunshou}`,
-                `值符 ${config.chiefStar}`,
-                `值使 ${config.chiefDoor}`,
+                `${config.timeInfo.hourGanzhi}时`,
                 `${config.dun}${config.ju}局`
             ].map((text) => `<span class="chip">${escapeHtml(text)}</span>`).join("");
-            dom.boardNote.textContent = config.note || "这是一个框架版奇门盘，重点是把四盘和规则入口拆分清楚，便于继续补自动排盘。";
+            dom.boardNote.textContent = "四个同心圆按外到内依次为神盘、天盘、人盘、地盘；宫位固定在外圈，盘内内容随参数转动。";
         }
 
         function buildFrame(config) {
@@ -947,62 +1168,25 @@
             };
         }
 
-        function readConfigFromForm() {
-            return {
-                name: state.config.name,
-                dun: dom.dunSelect.value,
-                ju: Number(dom.juSelect.value),
-                xunshou: dom.xunshouSelect.value,
-                chiefStar: dom.chiefStarSelect.value,
-                chiefDoor: dom.chiefDoorSelect.value,
-                chiefStarPalace: Number(dom.chiefStarPalaceSelect.value),
-                chiefDoorPalace: Number(dom.chiefDoorPalaceSelect.value),
-                note: dom.noteInput.value.trim()
-            };
-        }
-
-        function writeConfigToForm(config) {
-            dom.dunSelect.value = config.dun;
-            dom.juSelect.value = String(config.ju);
-            dom.xunshouSelect.value = config.xunshou;
-            dom.chiefStarSelect.value = config.chiefStar;
-            dom.chiefDoorSelect.value = config.chiefDoor;
-            dom.chiefStarPalaceSelect.value = String(config.chiefStarPalace);
-            dom.chiefDoorPalaceSelect.value = String(config.chiefDoorPalace);
-            dom.noteInput.value = config.note || "";
-        }
-
-        function refresh(customName = "自定义盘") {
+        function refresh() {
             const nextConfig = readConfigFromForm();
-            state.config = {
-                ...nextConfig,
-                name: customName
-            };
+            state.config = nextConfig;
 
             const frame = buildFrame(state.config);
-            renderBoard(frame);
+            renderWheel(frame);
             renderBoardHeader(state.config);
             renderSummary(buildSummary(state.config));
             renderTrace(buildTrace(state.config));
-            dom.presetSelect.value = customName;
         }
 
-        function applyPreset(index) {
-            const preset = PRESETS[index];
-            if (!preset) {
-                return;
-            }
-
-            state.presetIndex = index;
-            state.config = { ...preset };
-            writeConfigToForm(state.config);
-
+        function applyConfig(config) {
+            state.config = config;
+            writeConfigToForm(config);
             const frame = buildFrame(state.config);
-            renderBoard(frame);
+            renderWheel(frame);
             renderBoardHeader(state.config);
             renderSummary(buildSummary(state.config));
             renderTrace(buildTrace(state.config));
-            dom.presetSelect.value = preset.name;
         }
 
         function initSelects() {
@@ -1014,10 +1198,10 @@
             populateSelect(dom.chiefStarPalaceSelect, OUTER_RING, (value) => getPalaceLabel(value));
             populateSelect(dom.chiefDoorPalaceSelect, OUTER_RING, (value) => getPalaceLabel(value));
 
-            dom.presetSelect.innerHTML = [
-                ...PRESETS.map((item) => `<option value="${item.name}">${item.name}</option>`),
-                `<option value="自定义盘">自定义盘</option>`
-            ].join("");
+            dom.timezoneSelect.innerHTML = Array.from({ length: 27 }, (_, index) => index - 12)
+                .map((value) => `<option value="${value}">UTC${value >= 0 ? "+" : ""}${value}</option>`)
+                .join("");
+            dom.timezoneSelect.value = "8";
         }
 
         function initEvents() {
@@ -1025,44 +1209,58 @@
                 refresh();
             });
 
-            dom.nextPresetButton.addEventListener("click", () => {
-                const nextIndex = mod(state.presetIndex + 1, PRESETS.length);
-                applyPreset(nextIndex);
+            dom.autoButton.addEventListener("click", () => {
+                applyConfig(buildAutoConfig());
             });
 
-            dom.resetButton.addEventListener("click", () => {
-                applyPreset(0);
+            dom.prevHourButton.addEventListener("click", () => {
+                const date = parseDatetimeLocal(dom.datetimeInput.value);
+                dom.datetimeInput.value = toDatetimeLocalValue(new Date(date.getTime() - 2 * 60 * 60 * 1000));
+                applyConfig(buildAutoConfig());
             });
 
-            dom.presetSelect.addEventListener("change", (event) => {
-                const index = PRESETS.findIndex((item) => item.name === event.target.value);
-                if (index >= 0) {
-                    applyPreset(index);
-                }
+            dom.nowButton.addEventListener("click", () => {
+                dom.datetimeInput.value = toDatetimeLocalValue(new Date());
+                applyConfig(buildAutoConfig());
+            });
+
+            dom.nextHourButton.addEventListener("click", () => {
+                const date = parseDatetimeLocal(dom.datetimeInput.value);
+                dom.datetimeInput.value = toDatetimeLocalValue(new Date(date.getTime() + 2 * 60 * 60 * 1000));
+                applyConfig(buildAutoConfig());
             });
 
             [
+                dom.datetimeInput,
+                dom.latitudeInput,
+                dom.longitudeInput,
+                dom.timezoneSelect,
+                dom.solarTimeSelect,
+                dom.methodSelect,
+                dom.juMethodSelect,
                 dom.dunSelect,
                 dom.juSelect,
                 dom.xunshouSelect,
+                dom.godRuleSelect,
                 dom.chiefStarSelect,
                 dom.chiefDoorSelect,
                 dom.chiefStarPalaceSelect,
-                dom.chiefDoorPalaceSelect,
-                dom.noteInput
+                dom.chiefDoorPalaceSelect
             ].forEach((element) => {
                 element.addEventListener("change", () => refresh());
-                element.addEventListener("input", () => {
-                    if (element === dom.noteInput) {
-                        refresh();
-                    }
-                });
+                element.addEventListener("input", () => refresh());
             });
+        }
+
+        function initDefaults() {
+            dom.datetimeInput.value = toDatetimeLocalValue(new Date());
+            renderPalaceLabels();
+            applyConfig(buildAutoConfig());
         }
 
         initSelects();
         initEvents();
-        applyPreset(0);
+        initDefaults();
     </script>
 </body>
 </html>
